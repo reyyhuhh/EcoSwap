@@ -1,0 +1,171 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Register - Swopsy</title>
+    <link href="https://fonts.googleapis.com/css2?family=Open+Sans&family=Poppins:wght@600&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Open Sans', sans-serif;
+            background-color: #ffe6f0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+        }
+
+        .register-box {
+            background-color: #ffffff;
+            border-radius: 16px;
+            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.08);
+            padding: 40px 30px;
+            width: 360px;
+            text-align: center;
+        }
+
+        .register-box h2 {
+            font-family: 'Poppins', sans-serif;
+            color: #c2185b;
+            margin-bottom: 28px;
+            font-size: 1.5rem;
+        }
+
+        .form-group {
+            margin-bottom: 18px;
+            text-align: left;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 6px;
+            font-weight: bold;
+            color: #c2185b;
+        }
+
+        .register-box input[type="text"],
+        .register-box input[type="email"],
+        .register-box input[type="password"] {
+            width: 100%;
+            padding: 12px 14px;
+            border-radius: 8px;
+            border: 1px solid #f8bbd0;
+            font-size: 0.95rem;
+            box-sizing: border-box;
+        }
+
+        .register-box input::placeholder {
+            color: #bbb;
+        }
+
+        .register-box button {
+            background-color: #f48fb1;
+            color: white;
+            border: none;
+            padding: 12px;
+            border-radius: 8px;
+            width: 100%;
+            font-weight: bold;
+            font-size: 1rem;
+            cursor: pointer;
+            transition: background-color 0.3s ease;
+        }
+
+        .register-box button:hover {
+            background-color: #ec407a;
+        }
+
+        .register-box p {
+            margin-top: 20px;
+            font-size: 0.9rem;
+            color: #444;
+        }
+
+        .register-box .login-link {
+            margin-top: 20px;
+            font-size: 0.9rem;
+            color: #444;
+        }
+        .register-box a {
+            color: #c2185b;
+            font-weight: bold;
+            text-decoration: none;
+        }
+
+        .register-box a:hover {
+            text-decoration: underline;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="register-box">
+        <div class="register-container">
+            <h2>Create an Account</h2>
+
+            <p id="error-message" class="error-message" style="display: none;"></p>
+            
+            {% with messages = get_flashed_messages(with_categories=true) %}
+                {% if messages %}
+                    {% for category, message in messages %}
+                        {% if 'register' in category or 'error' in category %}
+                            <div class="alert-{{ category }}">{{ message }}</div>
+                        {% endif %}
+                    {% endfor %}
+                {% endif %}
+            {% endwith %}
+
+
+            <form method="POST" action="{{ url_for('register') }}" onsubmit="return checkPasswords();">
+                <div class="form-group">
+                    <label for="full_name">Full Name</label>
+                    <input type="text" name="full_name" placeholder="Enter your full name" required>
+                </div>
+
+                <div class="form-group">
+                    <label for="email">Email</label>
+                    <input type="email" name="email" placeholder="Enter your Bilkent email" required>
+                </div>
+
+                <div class="form-group">
+                    <label for="username">Username</label>
+                    <input type="text" name="username" placeholder="Enter your username" required>
+                </div>
+
+                <div class="form-group">
+                    <label for="password">Password</label>
+                    <input type="password" name="password" placeholder="Enter your password" required minlength="5" maxlength="20">
+                </div>
+
+                <div class="form-group">
+                    <label for="confirm_password">Confirm Password</label>
+                    <input type="password" name="confirm_password" placeholder="Confirm your password" required minlength="5" maxlength="20">
+                </div>
+
+                <button type="submit" class="register-btn">Register</button>
+            </form>
+
+            <div class="login-link">
+                <p>Already have an account? <a href="{{ url_for('login') }}">Login here</a></p>
+            </div>
+        </div>
+
+        <script>
+            function checkPasswords() {
+                const password = document.querySelector('input[name="password"]').value;
+                const confirmPassword = document.querySelector('input[name="confirm_password"]').value;
+                const msgBox = document.getElementById('error-message');
+
+                if (password !== confirmPassword) {
+                    msgBox.textContent = "Passwords do not match.";
+                    msgBox.style.display = "block";
+                    return false;
+                } else {
+                    msgBox.style.display = "none";
+                    return true;
+                }
+            }
+        </script>
+    </div>
+</body>
+</html>

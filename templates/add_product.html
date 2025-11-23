@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Add Product</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', sans-serif;
+            background-color: #fff0f5;
+            padding: 30px;
+            color: #333;
+        }
+
+        form {
+            max-width: 600px;
+            margin: 0 auto;
+            background: white;
+            padding: 30px;
+            border-radius: 10px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        }
+
+        h1 {
+            text-align: center;
+            color: #c2185b;
+        }
+
+        label {
+            font-weight: bold;
+            color: #880e4f;
+        }
+
+        input, textarea {
+            width: 100%;
+            margin-bottom: 20px;
+            padding: 10px;
+            border-radius: 6px;
+            border: 1px solid #ccc;
+        }
+
+        button {
+            background-color: #ec407a;
+            color: white;
+            padding: 12px 20px;
+            border: none;
+            border-radius: 8px;
+            font-weight: bold;
+            cursor: pointer;
+            width: 100%;
+        }
+
+        button:hover {
+            background-color: #d81b60;
+        }
+    </style>
+</head>
+<body>
+    <h1>Add New Product</h1>
+    <form method="POST" enctype="multipart/form-data">
+        <label>Title:</label>
+        <input type="text" name="title" required>
+
+        <label>Description:</label>
+        <textarea name="description" required></textarea>
+
+        <label>Price (RM):</label>
+        <input type="number" step="0.01" name="price" required>
+
+        <label>Available for Swap:</label>
+        <input type="checkbox" name="swap">
+
+        <label>Image:</label>
+        <input type="file" name="image" accept="image/*">
+
+        <button type="submit">Add Product</button>
+    </form>
+</body>
+</html>

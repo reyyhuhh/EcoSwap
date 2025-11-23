@@ -1,0 +1,149 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Your Inbox</title>
+  <style>
+    body {
+      font-family: 'Helvetica Neue', sans-serif;
+      background-color: #fff0f5;
+      margin: 0;
+      padding: 20px;
+      color: #333;
+    }
+
+    .back-button {
+      display: inline-block;
+      margin-bottom: 20px;
+      padding: 8px 16px;
+      background-color: #f48fb1;
+      color: white;
+      text-decoration: none;
+      border-radius: 6px;
+      font-weight: bold;
+      transition: background-color 0.3s ease;
+    }
+
+    .back-button:hover {
+      background-color: #ec407a;
+    }
+
+    .inbox-title {
+      text-align: center;
+      font-size: 1.8rem;
+      margin-bottom: 30px;
+      color: #c2185b;
+    }
+
+    .chatlist {
+      display: flex;
+      flex-direction: column;
+      gap: 14px;
+      max-width: 700px;
+      margin: 0 auto;
+    }
+
+    .chat-item {
+      background-color: #ffe6f0;
+      border-radius: 12px;
+      padding: 16px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      box-shadow: 0 4px 8px rgba(0, 0, 0, 0.05);
+      transition: transform 0.2s ease;
+    }
+
+    .chat-item:hover {
+      transform: scale(1.01);
+    }
+
+    .chat-info {
+      display: flex;
+      flex-direction: column;
+    }
+
+    .chat-info a {
+      font-weight: bold;
+      color: #ad1457;
+      text-decoration: none;
+      font-size: 1rem;
+    }
+
+    .chat-info a:hover {
+      text-decoration: underline;
+    }
+
+    .chat-time {
+      font-size: 0.85rem;
+      color: #666;
+      margin-top: 4px;
+    }
+
+    .delete-btn {
+      background-color: transparent;
+      color: #d32f2f;
+      border: none;
+      font-size: 0.9rem;
+      font-weight: bold;
+      cursor: pointer;
+      padding: 6px 12px;
+      border-radius: 6px;
+      transition: background-color 0.2s ease;
+    }
+
+    .delete-btn:hover {
+      background-color: #fddede;
+    }
+
+    .no-convo {
+      text-align: center;
+      font-style: italic;
+      color: #999;
+      margin-top: 50px;
+    }
+
+    @media screen and (max-width: 600px) {
+      .chat-item {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 10px;
+      }
+
+      .chat-info a {
+        font-size: 1rem;
+      }
+
+      .delete-btn {
+        align-self: flex-end;
+      }
+    }
+  </style>
+</head>
+<body>
+
+  <a href="{{ url_for('home') }}" class="back-button">← Back to Home</a>
+
+  <h2 class="inbox-title">Your Conversations</h2>
+
+  <div class="chatlist">
+    {% for msg in threads %}
+      <div class="chat-item">
+        <div class="chat-info">
+          <a href="{{ url_for('chat', receiver_id=msg.sender_id if msg.sender_id != current_user.id else msg.receiver_id, product_id=msg.product_id) }}">
+            Chat with {{ msg.receiver.username if msg.sender_id == current_user.id else msg.sender.username }}
+          </a>
+          <p class="chat-time">{{ msg.timestamp.strftime('%Y-%m-%d %H:%M') }}</p>
+        </div>
+
+        <form method="POST" action="{{ url_for('delete_chat', chat_id=msg.id) }}" onsubmit="return confirm('Delete this conversation?');">
+          <button type="submit" class="delete-btn">Delete</button>
+        </form>
+      </div>
+    {% else %}
+      <p class="no-convo">No conversations yet. Start chatting!</p>
+    {% endfor %}
+  </div>
+
+</body>
+</html>

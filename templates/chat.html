@@ -1,0 +1,161 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Chat</title>
+  <style>
+    body {
+      font-family: 'Helvetica Neue', sans-serif;
+      background-color: #fff0f5;
+      margin: 0;
+      padding: 30px 15px;
+      color: #333;
+    }
+
+    .chat-header {
+      text-align: center;
+      font-size: 1.7rem;
+      font-weight: bold;
+      color: #c2185b;
+      margin-bottom: 25px;
+    }
+
+    .chat-controls {
+      display: flex;
+      justify-content: space-between;
+      max-width: 600px;
+      margin: 0 auto 30px;
+    }
+
+    .chat-controls a {
+      background-color: #f8bbd0;
+      color: #fff;
+      padding: 8px 14px;
+      border-radius: 6px;
+      text-decoration: none;
+      font-weight: bold;
+      transition: background-color 0.3s ease;
+    }
+
+    .chat-controls a:hover {
+      background-color: #ec407a;
+    }
+
+    .chat-box {
+      max-width: 600px;
+      margin: 0 auto 30px;
+    }
+
+    .chat-log {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+
+    .chat-message {
+      padding: 12px 16px;
+      margin-bottom: 6px;
+      border-radius: 10px;
+      max-width: 75%;
+      font-size: 0.95rem;
+    }
+
+    .you {
+      background-color: #f48fb1;
+      color: #fff;
+      align-self: flex-end;
+      text-align: right;
+      margin-left: auto;
+    }
+
+    .other {
+      background-color: #fce4ec;
+      align-self: flex-start;
+    }
+
+    .timestamp {
+      font-size: 0.75rem;
+      color: #777;
+      margin-top: 6px;
+    }
+
+    .chat-form {
+      display: flex;
+      justify-content: center;
+      gap: 10px;
+      max-width: 600px;
+      margin: 0 auto;
+    }
+
+    textarea {
+      flex-grow: 1;
+      padding: 10px;
+      border-radius: 6px;
+      border: 1px solid #ccc;
+      font-size: 1rem;
+      resize: none;
+      min-height: 45px;
+    }
+
+    .send-btn {
+      background-color: #ec407a;
+      color: white;
+      border: none;
+      padding: 10px 18px;
+      border-radius: 6px;
+      font-weight: bold;
+      font-size: 1rem;
+      cursor: pointer;
+      transition: background-color 0.3s ease;
+    }
+
+    .send-btn:hover {
+      background-color: #d81b60;
+    }
+
+    @media screen and (max-width: 500px) {
+      .chat-controls {
+        flex-direction: column;
+        gap: 10px;
+        align-items: center;
+      }
+
+      .chat-form {
+        flex-direction: column;
+      }
+
+      .send-btn {
+        width: 100%;
+      }
+
+      textarea {
+        width: 100%;
+      }
+    }
+  </style>
+</head>
+<body>
+
+  <div class="chat-controls">
+    <a href="{{ url_for('inbox') }}">← Inbox</a>
+    <a href="{{ url_for('home') }}">🏠 Home</a>
+  </div>
+
+  <h2 class="chat-header">Chat with {{ receiver.username }}</h2>
+
+  <div class="chat-box chat-log">
+    {% for msg in messages %}
+      <div class="chat-message {% if msg.sender_id == current_user.id %}you{% else %}other{% endif %}">
+        <div>{{ msg.content }}</div>
+        <div class="timestamp">{{ msg.timestamp.strftime('%Y-%m-%d %H:%M') }}</div>
+      </div>
+    {% endfor %}
+  </div>
+
+  <form class="chat-form" method="POST">
+    <textarea name="message" placeholder="Type your message..." required></textarea>
+    <button class="send-btn" type="submit">Send</button>
+  </form>
+
+</body>
+</html>

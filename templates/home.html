@@ -1,0 +1,353 @@
+<!DOCTYPE html> 
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Swopsy Marketplace</title>
+    <link href="https://fonts.googleapis.com/css2?family=Open+Sans&family=Poppins:wght@600&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Open Sans', sans-serif;
+            background: url("{{ url_for('static', filename='uploads/websitebackground.png') }}") no-repeat center center fixed;
+            background-size: cover;
+            margin: 0;
+            padding: 0;
+            color: #333;
+        }
+
+        h1 {
+            text-align: center;
+            font-family: 'Poppins', sans-serif;
+            font-size: 2rem;
+            margin: 30px 0 10px;
+            color: #c2185b;
+        }
+
+        .top-nav {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 14px 30px;
+            background-color: #ffe6f0;
+            border-bottom: 1px solid #f3c3d3;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+
+        .nav-buttons {
+            display: flex;
+            gap: 12px;
+        }
+
+        .top-nav a {
+            background-color: #f48fb1;
+            color: #fff;
+            padding: 10px 16px;
+            text-decoration: none;
+            border-radius: 8px;
+            font-weight: bold;
+            font-size: 0.95rem;
+            transition: background-color 0.3s ease;
+        }
+
+        .top-nav a:hover {
+            background-color: #ec407a;
+        }
+
+        .search-form {
+            margin: 0;
+        }
+
+        .search-bar {
+            padding: 8px 14px;
+            border: 1px solid #f8bbd0;
+            border-radius: 8px;
+            font-size: 0.95rem;
+            width: 220px;
+            max-width: 100%;
+        }
+
+        .flash-messages {
+            text-align: center;
+            padding: 10px 20px;
+        }
+
+        .flash-messages .alert-success {
+            color: white;
+            background-color: #4caf50;
+            padding: 10px;
+            border-radius: 6px;
+            font-weight: bold;
+        }
+
+        .flash-messages .alert-info {
+            color: white;
+            background-color: #2196f3;
+            padding: 10px;
+            border-radius: 6px;
+        }
+
+        .flash-messages .alert-error {
+            color: white;
+            background-color: #f44336;
+            padding: 10px;
+            border-radius: 6px;
+        }
+
+        .product-list {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 24px;
+            justify-content: center;
+            padding: 30px 20px;
+        }
+
+        .product-card {
+            background-color: #ffffff;
+            border-radius: 14px;
+            box-shadow: 0 6px 14px rgba(0, 0, 0, 0.06);
+            padding: 16px;
+            width: 260px;
+            box-sizing: border-box;
+            display: flex;
+            flex-direction: column;
+            transition: transform 0.2s ease, box-shadow 0.3s ease;
+            text-align: left;
+        }
+
+        .product-card:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 10px 18px rgba(0,0,0,0.08);
+        }
+
+        .product-title {
+            font-size: 1.15rem;
+            font-weight: 600;
+            margin-bottom: 6px;
+            color: #c2185b;
+            font-family: 'Poppins', sans-serif;
+        }
+
+        .product-description {
+            font-size: 0.95rem;
+            color: #666;
+            margin-bottom: 8px;
+        }
+
+        .product-image img {
+            width: 100%;
+            border-radius: 10px;
+            margin-bottom: 12px;
+            object-fit: cover;
+        }
+
+        .uploader {
+            font-size: 0.85rem;
+            color: #999;
+            margin-bottom: 10px;
+        }
+
+        .swap-badge {
+            background-color: #f8bbd0;
+            color: #ad1457;
+            font-size: 0.8rem;
+            padding: 4px 10px;
+            border-radius: 20px;
+            display: inline-block;
+            margin-bottom: 10px;
+            font-weight: bold;
+        }
+
+        .chat-btn,
+        .btn-cart,
+        .btn-buy {
+            border: none;
+            padding: 10px 14px;
+            cursor: pointer;
+            border-radius: 6px;
+            font-size: 0.9rem;
+            margin-top: 5px;
+            width: 100%;
+            transition: all 0.3s ease;
+            font-weight: bold;
+        }
+
+        .chat-btn {
+            background-color: #f06292;
+            color: white;
+        }
+
+        .chat-btn:hover {
+            background-color: #e91e63;
+        }
+
+        .btn-cart {
+            background-color: #f8bbd0;
+            color: #6a1b9a;
+        }
+
+        .btn-cart:hover {
+            background-color: #f48fb1;
+            color: white;
+        }
+
+        .btn-buy {
+            background-color: #ec407a;
+            color: white;
+        }
+
+        .btn-buy:hover {
+            background-color: #d81b60;
+        }
+
+        .no-products {
+            text-align: center;
+            font-style: italic;
+            color: #888;
+            padding: 40px;
+        }
+
+        .site-header img {
+            width: 100%;
+            max-height: 350px;
+            display: block;
+            object-fit: contain;
+        }
+
+        .sold{
+            opacity: 0.6;
+            pointer-events: none;
+            position: relative;
+        }
+
+        .sold-badge {
+            position: relative;
+            top: 10px;
+            left: 10px;
+            background-color: crimson;
+            color: white;
+            padding: 4px 10px;
+            border-radius: 5px;
+            font-size: 0.85rem;
+            font-weight: bold;
+            z-index: 10;
+        }
+
+        .product-image {
+            position: relative;
+        }
+
+        .sold-text {
+            text-align: center;
+            color: #fff;
+            background-color: #e53935;
+            padding: 6px;
+            border-radius: 6px;
+            font-weight: bold;
+            margin-top: 10px;
+        }
+    </style>
+</head>
+<body>
+
+    <!-- SWOPSY Header Image -->
+    <div class="site-header">
+        <img src="{{ url_for('static', filename='uploads/swopsy.png') }}" alt="SWOPSY Header">
+    </div>
+
+    <!-- Top Navigation -->
+    <div class="top-nav">
+        <!-- ✅ Search Form -->
+        <form class="search-form" action="{{ url_for('search') }}" method="GET">
+            <input class="search-bar" type="text" name="search" placeholder="Search products..." />
+        </form>
+        <!-- Navigation Links -->
+        <div class="nav-buttons">
+            <a href="{{ url_for('inbox') }}">Inbox</a>
+            <a href="{{ url_for('add_product') }}">Add Product</a>
+            <a href="{{ url_for('my_listings') }}">My Listings</a>
+            <a href="{{ url_for('cart') }}">View Cart
+                {% if cart_count and cart_count > 0 %}
+                    <span style="background-color:red; color:white; border-radius:50%; padding:2px 6px; font-size:0.8rem;">
+                        {{ cart_count }}
+                    </span>
+                {% endif %}
+            </a>
+            <a href="{{ url_for('logout') }}">Logout</a>
+        </div>
+    </div>
+
+    <!-- Flash Messages -->
+    <div class="flash-messages">
+        {% with messages = get_flashed_messages(with_categories=true) %}
+            {% if messages %}
+                {% for category, message in messages %}
+                    <div class="alert-{{ category }}">{{ message }}</div>
+                {% endfor %}
+            {% endif %}
+        {% endwith %}
+    </div>
+
+    <!-- back to al product Display -->
+    {% if search_query %}
+    <div style="text-align: center; margin-bottom: 20px;">
+        <a href="{{ url_for('home') }}" style="background-color: #f48fb1; color: white; padding: 10px 18px; border-radius: 8px; text-decoration: none; font-weight: bold;">
+            ← Back to All Products
+        </a>
+    </div>
+    {% endif %}
+
+
+    <!-- Product Listings -->
+    <div class="product-list">
+        {% if products %}
+            {% for product in products %}
+                <div class="product-card {% if product.sold %}sold{% endif %}">
+                    <div class="product-title">{{ product.title }}</div>
+                    <div class="product-description">{{ product.description }}</div>
+                    <div class="product-price">RM {{ "%.2f"|format(product.price or 0) }}</div>
+
+
+                    {% if product.swap_option %}
+                        <div class="swap-badge">Swap Available</div>
+                    {% endif %}
+
+                    {% if product.image_filename %}
+                        <div class="product-image">
+                            <img src="{{ url_for('static', filename='uploads/' ~ product.image_filename) }}" alt="{{ product.title }}">
+                            {% if product.sold %}
+                                <div class="sold-badge">SOLD</div>
+                            {% endif %}
+                        </div>
+                    {% endif %}
+
+                    <div class="uploader">
+                        Uploaded by: <strong>{{ product.seller.username }}</strong>
+                    </div>
+
+                    {% if product.seller.id != current_user.id %}
+                        <a href="{{ url_for('chat', receiver_id=product.seller.id, product_id=product.id) }}">
+                            <button class="chat-btn">Chat Seller</button>
+                        </a>
+
+                        {% if not product.sold %}
+                            <form action="{{ url_for('add_to_cart', product_id=product.id) }}" method="POST">
+                                <button type="submit" class="btn-cart">Add to Cart</button>
+                            </form>
+                            <a href="{{ url_for('checkout_single', product_id=product.id) }}">
+                                <button class="btn-buy">Buy Now</button>
+                            </a>
+                        {% else %}
+                            <button class="sold-text">This item is sold</button>
+                        {% endif %}
+
+                    {% endif %}
+                </div>
+            {% endfor %}
+        {% else %}
+            <p class="no-products">No products yet. Go add one!</p>
+        {% endif %}
+    </div>
+
+</body>
+</html>
