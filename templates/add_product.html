@@ -5,40 +5,91 @@
     <style>
         body {
             font-family: 'Segoe UI', sans-serif;
-            background-color: #fff0f5;
+            background-color: #e3f2fd;  /* Baby Blue Background */
             padding: 30px;
             color: #333;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+            flex-direction: column;
+        }
+
+        /* Back to Home Button Styling */
+        .back-home-btn {
+            background-color: #bbdefb;  /* Light Blue */
+            color: #1976d2;  /* Dark Blue */
+            padding: 10px 15px;
+            font-size: 1rem;
+            font-weight: bold;
+            border: 2px solid #1976d2;
+            border-radius: 50px;
+            text-align: center;
+            cursor: pointer;
+            text-decoration: none;
+            display: inline-block;
+            margin-bottom: 20px;
+            transition: all 0.3s ease;
+        }
+
+        .back-home-btn:hover {
+            background-color: #1976d2;  /* Dark Blue */
+            color: white;
+            transform: translateY(-3px);
         }
 
         form {
             max-width: 600px;
-            margin: 0 auto;
-            background: white;
-            padding: 30px;
-            border-radius: 10px;
-            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+            width: 100%;
+            background: #ffffff;
+            padding: 40px;
+            border-radius: 15px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+            transition: all 0.3s ease;
+        }
+
+        form:hover {
+            box-shadow: 0 15px 50px rgba(0, 0, 0, 0.2);
         }
 
         h1 {
             text-align: center;
-            color: #c2185b;
+            color: #1976d2;  /* Dark Blue */
+            font-size: 2.5rem;
+            margin-bottom: 20px;
         }
 
         label {
             font-weight: bold;
-            color: #880e4f;
+            color: #1976d2;  /* Dark Blue for labels */
+            margin-bottom: 8px;
+            font-size: 1rem;
+            display: block;
         }
 
-        input, textarea {
+        input, textarea, select {
             width: 100%;
             margin-bottom: 20px;
-            padding: 10px;
-            border-radius: 6px;
-            border: 1px solid #ccc;
+            padding: 12px;
+            border-radius: 8px;
+            border: 1px solid #90caf9;  /* Light Blue Border */
+            font-size: 1rem;
+            transition: all 0.3s ease;
+        }
+
+        input:focus, textarea:focus, select:focus {
+            border-color: #1976d2;  /* Dark Blue on Focus */
+            outline: none;
+        }
+
+        textarea {
+            resize: vertical;
+            min-height: 150px;
         }
 
         button {
-            background-color: #ec407a;
+            background-color: #1976d2;  /* Dark Blue */
             color: white;
             padding: 12px 20px;
             border: none;
@@ -46,32 +97,89 @@
             font-weight: bold;
             cursor: pointer;
             width: 100%;
+            font-size: 1.1rem;
+            transition: background-color 0.3s ease;
         }
 
         button:hover {
-            background-color: #d81b60;
+            background-color: #1565c0;  /* Even Darker Blue */
         }
+
+        .file-label {
+            display: block;
+            margin-bottom: 8px;
+            color: #1976d2;  /* Dark Blue */
+            font-weight: bold;
+        }
+
+        .file-input {
+            font-size: 1rem;
+        }
+
+        .swap-label {
+            color: #1976d2;  /* Dark Blue */
+            font-weight: bold;
+            display: block;
+            margin-top: 20px;
+            margin-bottom: 10px;
+        }
+
+        .back-home-btn {
+            background-color: #bbdefb;  /* Light Blue */
+            color: #1976d2;  /* Dark Blue */
+            padding: 10px 15px;
+            font-size: 1rem;
+            font-weight: bold;
+            border: 2px solid #1976d2;
+            border-radius: 50px;
+            text-align: center;
+            cursor: pointer;
+            text-decoration: none;
+            display: inline-block;
+            margin: auto;
+            margin-top: 20px;
+            transition: all 0.3s ease;
+            width: 95%;
+        }
+
+        .back-home-btn:hover {
+            background-color: #1976d2;  /* Dark Blue */
+            color: white;
+            transform: translateY(-3px);
+        }
+
     </style>
 </head>
 <body>
-    <h1>Add New Product</h1>
     <form method="POST" enctype="multipart/form-data">
-        <label>Title:</label>
-        <input type="text" name="title" required>
+        <h1>Add New Product</h1>
+        
+        <label for="title">Title:</label>
+        <input type="text" name="title" id="title" required>
 
-        <label>Description:</label>
-        <textarea name="description" required></textarea>
+        <label for="description">Description:</label>
+        <textarea name="description" id="description" required></textarea>
 
-        <label>Price (RM):</label>
-        <input type="number" step="0.01" name="price" required>
+        <label class="swap-label" for="swap">Available for Swap:</label>
+        <input type="checkbox" name="swap" id="swap">
 
-        <label>Available for Swap:</label>
-        <input type="checkbox" name="swap">
+        <label for="quality">Quality of the Product:</label>
+        <select name="quality" id="quality" required>
+            <option value="">Select Quality</option>
+            <option value="new">New</option>
+            <option value="like_new">Like New</option>
+            <option value="used">Used</option>
+            <option value="worn">Worn</option>
+        </select>
 
-        <label>Image:</label>
-        <input type="file" name="image" accept="image/*">
+        <label class="file-label" for="image">Image:</label>
+        <input type="file" name="image" id="image" class="file-input" accept="image/*" required>
 
-        <button type="submit">Add Product</button>
+        <button type="submit">Add Product</button> 
+        
+        <a href="{{ url_for('home') }}" class="back-home-btn">← Back to Home</a>
+
     </form>
+
 </body>
 </html>

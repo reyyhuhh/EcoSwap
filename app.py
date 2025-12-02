@@ -105,11 +105,6 @@ def register():
         password = request.form['password']
         confirm_password = request.form['confirm_password']
 
-        allowed_domains = ("bilkent.edu.tr", "ug.bilkent.edu.tr", "pg.bilkent.edu.tr")
-        if not email.endswith(allowed_domains):
-            flash("Please use a valid Bilkent University email address.", "error")
-            return redirect(url_for('register'))
-
         if password != confirm_password:
             flash("Passwords do not match.", "error")
             return redirect(url_for('register'))
@@ -232,19 +227,76 @@ def cart():
     total = sum(item.product.price or 0 for item in items)
     return render_template("cart.html", items=items, total=total)
 
+from models import Order
+@app.route('/checkout', methods=['GET', 'POST'])
+@login_required
+def checkout():
+    items = CartItem.query.filter_by(user_id=current_user.id).all()
+    total = sum(item.product.price or 0 for item in items)
+
+    if request.method == 'POST':
+        delivery = request.form['delivery']
+        address = request.form['address']
+        payment = request.form['payment']
+
+        for item in items:
+            order = Order(
+                buyer_id=current_user.id,
+                product_id=item.product.id,
+                delivery_method=delivery,
+                shipping_address=address,
+                payment_method=payment
+            )
+            db.session.add(order)
+            item.product.sold = True
+
+        db.session.commit()
+        CartItem.query.filter_by(user_id=current_user.id).delete()
+        db.session.commit()
+
+        return redirect(url_for('receipt'))
+
+    return render_template('checkout.html', items=items, total=total)
+
+
 @app.route('/toggle_sold/<int:product_id>', methods=['POST'])
 @login_required
 def toggle_sold(product_id):
     product = Product.query.get_or_404(product_id)
     if product.user_id != current_user.id:
         flash("You are not authorized to change this product's status.", "error")
-        return redirect(url_for('my_listings'))
+        return redirect(url_for('profile'))
     
     product.sold = not product.sold
     db.session.commit()
-    return redirect(url_for('my_listings'))
+    return redirect(url_for('profile'))
 
-from models import Order
+@app.route('/checkout/<int:product_id>', methods=['GET', 'POST'])
+@login_required
+def checkout_single(product_id):
+    product = Product.query.get_or_404(product_id)
+    total = product.price or 0
+
+    if request.method == 'POST':
+        delivery = request.form['delivery']
+        address = request.form['address']
+        payment = request.form['payment']
+
+        order = Order(
+            buyer_id=current_user.id,
+            product_id=product.id,
+            delivery_method=delivery,
+            shipping_address=address,
+            payment_method=payment
+        )
+        db.session.add(order)
+        product.sold = True
+        db.session.commit()
+
+        return redirect(url_for('receipt'))
+
+    return render_template('checkout.html', product=product, total=total)
+
 @app.route('/orders/<int:product_id>')
 @login_required
 def orders_for_product(product_id):
@@ -265,6 +317,48 @@ def my_orders():
     orders = Order.query.join(Product).filter(Product.user_id == current_user.id).all()
     return render_template('my_orders.html', orders=orders)
 
+@app.route('/feedback', methods=['GET', 'POST'])
+@login_required
+def feedback():
+    if request.method == 'POST':
+        # Get form data
+        feedback_topic = request.form['topic']  # Feedback topic
+        feedback_type = request.form['feedback_type']  # Type of feedback (e.g., product experience, customer service)
+        description = request.form['description']  # Feedback description
+        contact_info = request.form.get('contact_info')  # Optional contact info
+
+        # Create a new Feedback report
+        feedback_report = FeedbackReport(
+            feedback_topic=feedback_topic,
+            feedback_type=feedback_type,
+            description=description,
+            contact_info=contact_info,
+            user_id=current_user.id  # Link to the currently logged-in user
+        )
+
+        # Add the report to the database
+        db.session.add(feedback_report)
+        db.session.commit()
+
+        flash('Your feedback has been submitted successfully!', 'success')
+        return redirect(url_for('home'))  # Redirect to home or any page after submission
+
+    return render_template('feedback.html')  # Render the feedback form
+
+
+
+@app.route('/receipt')
+@login_required
+def receipt():
+    items = CartItem.query.filter_by(user_id=current_user.id).all()
+    total = sum(item.product.price or 0 for item in items)
+    
+    # Optionally clear cart
+    CartItem.query.filter_by(user_id=current_user.id).delete()
+    db.session.commit()
+    
+    return render_template('receipt.html', items=items, total=total)
+
 
 @app.route('/remove_from_cart/<int:item_id>', methods=['POST'])
 @login_required
@@ -276,11 +370,11 @@ def remove_from_cart(item_id):
         flash('Item removed from cart', 'success')
     return redirect(url_for('cart'))
 
-@app.route('/my_listings')
+@app.route('/profile')
 @login_required
-def my_listings():
+def profile():    
     user_products = Product.query.filter_by(user_id=current_user.id).all()
-    return render_template('my_listings.html', products=user_products)
+    return render_template('profile.html', products=user_products)
 
 @app.route('/delete_product/<int:product_id>', methods=['POST'])
 @login_required
@@ -288,12 +382,12 @@ def delete_product(product_id):
     product = Product.query.get_or_404(product_id)
     if product.user_id != current_user.id:
         flash("You are not authorized to delete this product.", "error")
-        return redirect(url_for('my_listings'))
+        return redirect(url_for('profile'))
 
     db.session.delete(product)
     db.session.commit()
     flash("Product deleted successfully.", "success")
-    return redirect(url_for('my_listings'))
+    return redirect(url_for('profile'))
 
 @app.route('/add_to_cart/<int:product_id>', methods=['POST'])
 @login_required
@@ -319,6 +413,23 @@ def inject_cart_count():
         return dict(cart_count=count)
     return dict(cart_count=0)
 
+
+@app.route('/buy_now/<int:product_id>', methods=['POST'])
+@login_required
+def buy_now(product_id):
+    product = Product.query.get_or_404(product_id)
+    if product.user_id == current_user.id:
+        flash("You cannot buy your own product.", "error")
+        return redirect(url_for('home'))
+
+    # Here you would typically handle the purchase logic
+    flash(f"You have purchased {product.title} successfully!", "success")
+    
+    # Optionally, you can remove the product from the listings
+    db.session.delete(product)
+    db.session.commit()
+    
+    return redirect(url_for('home'))
 
 from flask_login import logout_user
 from flask import redirect, url_for, flash

@@ -57,3 +57,17 @@ class Order(db.Model):
     buyer = db.relationship('User', backref='orders')
     product = db.relationship('Product', backref='order')
 
+class ScamReport(db.Model):
+    __tablename__ = 'scam_reports'
+    id = db.Column(db.Integer, primary_key=True)
+    product_name = db.Column(db.String(255), nullable=False)
+    scam_type = db.Column(db.String(100), nullable=False)
+    description = db.Column(db.Text, nullable=False)
+    contact_info = db.Column(db.String(255), nullable=True)
+    timestamp = db.Column(db.DateTime, default=datetime.utcnow)
+
+    user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
+    user = db.relationship('User', backref='scam_reports', lazy=True)
+
+    def __repr__(self):
+        return f'<ScamReport {self.id} - {self.scam_type} - {self.product_name}>'

@@ -1,0 +1,139 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Feedback - EcoSwap Marketplace</title>
+    <link href="https://fonts.googleapis.com/css2?family=Open+Sans&family=Poppins:wght@600&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Open Sans', sans-serif;
+            background-color: #f5f5f5;
+            margin: 0;
+            padding: 0;
+            color: #333;
+        }
+
+        h1 {
+            text-align: center;
+            font-family: 'Poppins', sans-serif;
+            font-size: 2rem;
+            margin: 30px 0;
+            color: #c2185b;
+        }
+
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: #fff;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+            border-radius: 8px;
+        }
+
+        .form-label {
+            font-size: 1rem;
+            margin-bottom: 8px;
+            font-weight: bold;
+            display: block;
+        }
+
+        .form-input,
+        .form-textarea {
+            width: 100%;
+            padding: 10px;
+            margin-bottom: 15px;
+            border: 1px solid #ddd;
+            border-radius: 6px;
+            font-size: 1rem;
+        }
+
+        .form-textarea {
+            height: 150px;
+            resize: vertical;
+        }
+
+        .form-button {
+            background-color: #ec407a;
+            color: white;
+            padding: 12px 20px;
+            font-size: 1rem;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            transition: background-color 0.3s;
+            width: 100%;
+        }
+
+        .form-button:hover {
+            background-color: #d81b60;
+        }
+
+        .message {
+            text-align: center;
+            margin-top: 20px;
+            color: #4caf50;
+            font-weight: bold;
+        }
+
+        .error-message {
+            color: #f44336;
+        }
+
+    </style>
+</head>
+<body>
+
+    <a href="{{ url_for('home') }}" class="back-button">← Back to Home</a>
+
+    <!-- Header -->
+    <h1>We Value Your Feedback!</h1>
+
+    <div class="container">
+        <form action="{{ url_for('feedback') }}" method="POST" id="feedbackForm">
+            <!-- Feedback Topic -->
+            <div>
+                <label class="form-label" for="topic">What feedback would you like to provide?</label>
+                <input type="text" id="topic" name="topic" class="form-input" required placeholder="Feedback Topic (e.g., Product experience)">
+            </div>
+
+            <!-- Feedback Type -->
+            <div>
+                <label class="form-label" for="feedback_type">Type of Feedback:</label>
+                <select id="feedback_type" name="feedback_type" class="form-input" required>
+                    <option value="">Select Feedback Type</option>
+                    <option value="product_experience">Product Experience</option>
+                    <option value="customer_service">Customer Service</option>
+                    <option value="website_experience">Website Experience</option>
+                    <option value="other">Other</option>
+                </select>
+            </div>
+
+            <!-- Description of the feedback -->
+            <div>
+                <label class="form-label" for="description">Your Feedback:</label>
+                <textarea id="description" name="description" class="form-textarea" required placeholder="Please share your thoughts, suggestions, or issues..."></textarea>
+            </div>
+
+            <!-- Contact Info (Optional) -->
+            <div>
+                <label class="form-label" for="contact_info">Your Contact Information (optional):</label>
+                <input type="text" id="contact_info" name="contact_info" class="form-input" placeholder="Your email or phone number (optional)">
+            </div>
+
+            <!-- Submit button -->
+            <button type="submit" class="form-button">Submit Feedback</button>
+        </form>
+
+        <!-- Success/Error Message -->
+        <div class="message" id="message">
+            {% with messages = get_flashed_messages() %}
+                {% if messages %}
+                    <p class="error-message">{{ messages[0] }}</p>
+                {% endif %}
+            {% endwith %}
+        </div>
+    </div>
+
+</body>
+</html>
