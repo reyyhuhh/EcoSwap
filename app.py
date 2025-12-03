@@ -317,6 +317,7 @@ def my_orders():
     orders = Order.query.join(Product).filter(Product.user_id == current_user.id).all()
     return render_template('my_orders.html', orders=orders)
 
+from models import Feedback
 @app.route('/feedback', methods=['GET', 'POST'])
 @login_required
 def feedback():
@@ -328,7 +329,7 @@ def feedback():
         contact_info = request.form.get('contact_info')  # Optional contact info
 
         # Create a new Feedback report
-        feedback_report = FeedbackReport(
+        feedback_report = Feedback(
             feedback_topic=feedback_topic,
             feedback_type=feedback_type,
             description=description,
