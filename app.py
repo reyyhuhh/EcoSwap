@@ -25,7 +25,7 @@ def allowed_file(filename):
 
 # Initialize extensions
 db.init_app(app)
-bcrypt = Bcrypt(app)
+bcrypt = Bcrypt(app) #init bcrypt
 migrate = Migrate(app, db)
 
 login_manager = LoginManager()
@@ -37,6 +37,28 @@ login_manager.login_view = 'login'
 def load_user(user_id):
     return User.query.get(int(user_id))
 
+#admin account init
+def create_admin():
+    with app.app_context():
+        # Check if admin exists
+        admin = User.query.filter_by(username='adminecoswap').first()
+        if not admin:
+            # Create the admin if not found
+            hashed_pw = bcrypt.generate_password_hash('ecoswap12345').decode('utf-8')
+            new_admin = User(
+                full_name='System Admin',
+                username='adminecoswap',
+                email='admin@ecoswap.com', # Needs a dummy email
+                password=hashed_pw,
+                is_admin=True  # <--- THIS IS KEY for your admin dashboard
+            )
+            db.session.add(new_admin)
+            db.session.commit()
+            print("Admin account created successfully!")
+        else:
+            print("Admin account already exists.")
+
+create_admin()
 
 # ---------------- ROUTES ---------------- #
 
@@ -58,35 +80,66 @@ def home():
     products = Product.query.all()
     return render_template('home.html', products=products)
 
-
-from flask import flash
-
+from flask import Blueprint
 @app.route('/login', methods=['GET', 'POST'])
 def login():
+    # Check if the user is already logged in
     if current_user.is_authenticated:
-        return redirect('/home')
+        return redirect(url_for('home'))  # Redirect to home page if already logged in
 
     if request.method == 'POST':
+        # Get form data
         login_input = request.form['email']
         password = request.form['password']
 
+        # Check if the credentials match 'adminecoswap' and 'ecoswap12345'
+        if login_input == 'adminecoswap' and password == 'ecoswap12345':
+            # Find admin user
+            admin_user = User.query.filter_by(username='adminecoswap').first()
+            if not admin_user:
+                flash('Admin user does not exist.', 'error')
+                return redirect(url_for('login'))
+
+            login_user(admin_user)  # Log the admin in
+            return redirect(url_for('admin'))  # Redirect to the admin dashboard page
+
+        # Regular user login flow
         user = User.query.filter(
             or_(
                 User.email == login_input,
                 User.username == login_input
-                )
-            ).first()
+            )
+        ).first()
 
-        if not user:
-            flash("Email not found.", "error")
-        elif not bcrypt.check_password_hash(user.password, password):
-            flash("Incorrect password.", "error")
+        if user and not bcrypt.check_password_hash(user.password, password):
+             flash("Incorrect password.", "error")
+        elif not user:
+             flash("User does not exist.", "error") # Handle case where user isn't found
         else:
             login_user(user)
             flash(f"Welcome back, {user.username}!", "success")
-            return redirect('/home')
+            return redirect(url_for('home'))
 
     return render_template('login.html')
+
+@app.route('/admin')
+@login_required
+def admin():
+    # Ensure only admins can access this route
+    if not current_user.is_admin:
+        flash("You are not authorized to view this page.", "error")
+        return redirect(url_for('home'))
+
+    all_users = User.query.all()
+    all_products = Product.query.all()
+    all_feedback = Feedback.query.all()
+
+    return render_template(
+        'admin.html',
+        users=all_users,
+        products=all_products,
+        feedback_list=all_feedback
+    )
 
 @app.route('/logout')
 @login_required

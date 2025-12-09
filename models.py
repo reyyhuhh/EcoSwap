@@ -12,11 +12,15 @@ class User(db.Model, UserMixin):
     username = db.Column(db.String(50), nullable=False)
     email = db.Column(db.String(100), unique=True, nullable=False)
     password = db.Column(db.String(100), nullable=False)
+    is_admin = db.Column(db.Boolean, default=False) #admin account
 
     products = db.relationship('Product', back_populates='seller')
     sent_messages = db.relationship('Message', foreign_keys='Message.sender_id', backref='sender', lazy=True)
     received_messages = db.relationship('Message', foreign_keys='Message.receiver_id', backref='receiver', lazy=True)
     cart_items = db.relationship('CartItem', backref='user', lazy=True)
+
+    def __repr__(self):
+        return f'<User {self.username}>'
 
 
 class Product(db.Model):
