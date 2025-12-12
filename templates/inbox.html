@@ -1,149 +1,165 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <title>Your Inbox</title>
-  <style>
-    body {
-      font-family: 'Helvetica Neue', sans-serif;
-      background-color: #e3f2fd;  /* Baby Blue Background */
-      margin: 0;
-      padding: 20px;
-      color: #333;
-    }
+    <meta charset="UTF-8">
+    <title>Your Inbox</title>
+    <link href="https://fonts.googleapis.com/css2?family=Open+Sans&family=Poppins:wght@600&display=swap" rel="stylesheet">
+    <style>
+        /* --- ECO-SWAP GREEN THEME STYLES --- */
+        :root {
+            --color-primary: #388e3c; /* Dark Green */
+            --color-secondary: #66bb6a; /* Medium Green (for button/accents) */
+            --color-light-bg: #f1f8e9; /* Very Light Green Background */
+            --color-chat-item: #e8f5e9; /* Light Green for Chat Items */
+            --color-delete-text: #d32f2f; /* Red for Delete Button */
+            --color-delete-hover-bg: #ffebee; /* Lightest Red on Hover */
+            --color-text: #333;
+            --color-subtle-text: #666;
+        }
 
-    .back-button {
-      display: inline-block;
-      margin-bottom: 20px;
-      padding: 8px 16px;
-      background-color: #81d4fa;  /* Light Blue */
-      color: white;
-      text-decoration: none;
-      border-radius: 6px;
-      font-weight: bold;
-      transition: background-color 0.3s ease;
-    }
+        body {
+            font-family: 'Open Sans', sans-serif;
+            background-color: var(--color-light-bg);
+            margin: 0;
+            padding: 20px;
+            color: var(--color-text);
+        }
 
-    .back-button:hover {
-      background-color: #4fa3d1;  /* Darker Blue on Hover */
-    }
+        .back-button {
+            display: inline-block;
+            margin-bottom: 20px;
+            padding: 8px 16px;
+            background-color: var(--color-secondary);
+            color: white;
+            text-decoration: none;
+            border-radius: 6px;
+            font-weight: bold;
+            transition: background-color 0.3s ease;
+        }
 
-    .inbox-title {
-      text-align: center;
-      font-size: 1.8rem;
-      margin-bottom: 30px;
-      color: #1976d2;  /* Darker Blue for Title */
-    }
+        .back-button:hover {
+            background-color: var(--color-primary);
+        }
 
-    .chatlist {
-      display: flex;
-      flex-direction: column;
-      gap: 14px;
-      max-width: 700px;
-      margin: 0 auto;
-    }
+        .inbox-title {
+            text-align: center;
+            font-size: 1.8rem;
+            margin-bottom: 30px;
+            color: var(--color-primary);
+        }
 
-    .chat-item {
-      background-color: #bbdefb;  /* Light Blue for Chat Items */
-      border-radius: 12px;
-      padding: 16px;
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      box-shadow: 0 4px 8px rgba(0, 0, 0, 0.05);
-      transition: transform 0.2s ease;
-    }
+        .chatlist {
+            display: flex;
+            flex-direction: column;
+            gap: 14px;
+            max-width: 700px;
+            margin: 0 auto;
+        }
 
-    .chat-item:hover {
-      transform: scale(1.01);
-    }
+        .chat-item {
+            background-color: var(--color-chat-item); /* Light Green for Chat Items */
+            border-radius: 12px;
+            padding: 16px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.05);
+            transition: transform 0.2s ease, box-shadow 0.3s ease;
+            border: 1px solid #dcedc8; /* Very subtle border */
+        }
 
-    .chat-info {
-      display: flex;
-      flex-direction: column;
-    }
+        .chat-item:hover {
+            transform: scale(1.01);
+            box-shadow: 0 6px 12px rgba(0, 0, 0, 0.08);
+        }
 
-    .chat-info a {
-      font-weight: bold;
-      color: #1976d2;  /* Dark Blue for Links */
-      text-decoration: none;
-      font-size: 1rem;
-    }
+        .chat-info {
+            display: flex;
+            flex-direction: column;
+        }
 
-    .chat-info a:hover {
-      text-decoration: underline;
-    }
+        .chat-info a {
+            font-weight: bold;
+            color: var(--color-primary); /* Dark Green for Links */
+            text-decoration: none;
+            font-size: 1rem;
+        }
 
-    .chat-time {
-      font-size: 0.85rem;
-      color: #666;
-      margin-top: 4px;
-    }
+        .chat-info a:hover {
+            text-decoration: underline;
+        }
 
-    .delete-btn {
-      background-color: transparent;
-      color: #d32f2f;  /* Red for Delete Button */
-      border: none;
-      font-size: 0.9rem;
-      font-weight: bold;
-      cursor: pointer;
-      padding: 6px 12px;
-      border-radius: 6px;
-      transition: background-color 0.2s ease;
-    }
+        .chat-time {
+            font-size: 0.85rem;
+            color: var(--color-subtle-text);
+            margin-top: 4px;
+        }
 
-    .delete-btn:hover {
-      background-color: #fddede;  /* Light Red Background on Hover */
-    }
+        .delete-btn {
+            background-color: transparent;
+            color: var(--color-delete-text); /* Red for Delete Button */
+            border: 1px solid var(--color-delete-text);
+            font-size: 0.9rem;
+            font-weight: bold;
+            cursor: pointer;
+            padding: 6px 12px;
+            border-radius: 6px;
+            transition: all 0.2s ease;
+        }
 
-    .no-convo {
-      text-align: center;
-      font-style: italic;
-      color: #888;
-      margin-top: 50px;
-    }
+        .delete-btn:hover {
+            background-color: var(--color-delete-text);
+            color: white;
+        }
 
-    @media screen and (max-width: 600px) {
-      .chat-item {
-        flex-direction: column;
-        align-items: flex-start;
-        gap: 10px;
-      }
+        .no-convo {
+            text-align: center;
+            font-style: italic;
+            color: var(--color-subtle-text);
+            margin-top: 50px;
+        }
 
-      .chat-info a {
-        font-size: 1rem;
-      }
+        @media screen and (max-width: 600px) {
+            .chat-item {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 10px;
+            }
 
-      .delete-btn {
-        align-self: flex-end;
-      }
-    }
-  </style>
+            .delete-btn {
+                align-self: flex-end;
+            }
+        }
+    </style>
 </head>
 <body>
 
-  <a href="{{ url_for('home') }}" class="back-button">← Back to Home</a>
+    <a href="{{ url_for('home') }}" class="back-button">← Back to Home</a>
 
-  <h2 class="inbox-title">Your Conversations</h2>
+    <h2 class="inbox-title">Your Conversations</h2>
 
-  <div class="chatlist">
-    {% for msg in threads %}
-      <div class="chat-item">
-        <div class="chat-info">
-          <a href="{{ url_for('chat', receiver_id=msg.sender_id if msg.sender_id != current_user.id else msg.receiver_id, product_id=msg.product_id) }}">
-            Chat with {{ msg.receiver.username if msg.sender_id == current_user.id else msg.sender.username }}
-          </a>
-          <p class="chat-time">{{ msg.timestamp.strftime('%Y-%m-%d %H:%M') }}</p>
-        </div>
+    <div class="chatlist">
+        {% for msg in threads %}
+            {# --- Determine the ID of the other user in the thread --- #}
+            {% set other_user_id = msg.sender_id if msg.sender_id != current_user.id else msg.receiver_id %}
+            
+            <div class="chat-item">
+                <div class="chat-info">
+                    <a href="{{ url_for('chat', receiver_id=other_user_id, product_id=msg.product_id) }}">
+                        Chat with {{ msg.receiver.username if msg.sender_id == current_user.id else msg.sender.username }}
+                    </a>
+                    <p class="chat-time">{{ msg.timestamp.strftime('%Y-%m-%d %H:%M') }}</p>
+                </div>
 
-        <form method="POST" action="{{ url_for('delete_chat', chat_id=msg.id) }}" onsubmit="return confirm('Delete this conversation?');">
-          <button type="submit" class="delete-btn">Delete</button>
-        </form>
-      </div>
-    {% else %}
-      <p class="no-convo">No conversations yet. Start chatting!</p>
-    {% endfor %}
-  </div>
+                {# --- FIX: Pass the required 'other_user_id' parameter --- #}
+                <form method="POST" action="{{ url_for('delete_chat', other_user_id=other_user_id) }}" onsubmit="return confirm('Delete this conversation?');">
+                    <button type="submit" class="delete-btn">Delete</button>
+                </form>
+            </div>
+        {% else %}
+            <p class="no-convo">No conversations yet. Start chatting!</p>
+        {% endfor %}
+    </div>
 
 </body>
 </html>

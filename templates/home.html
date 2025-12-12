@@ -297,11 +297,15 @@
                 <div class="product-card {% if product.sold %}sold{% endif %}">
                     <div class="product-title">{{ product.title }}</div>
                     <div class="product-description">{{ product.description }}</div>
-                    <div class="product-price">RM {{ "%.2f"|format(product.price or 0) }}</div>
-
-
+                    
                     {% if product.swap_option %}
                         <div class="swap-badge">Swap Available</div>
+                    {% endif %}
+
+                    {% if product.quality and product.quality in quality_map %}
+                        <div class="quality-badge">
+                            Quality: {{ quality_map[product.quality] }}
+                        </div>
                     {% endif %}
 
                     {% if product.image_filename %}

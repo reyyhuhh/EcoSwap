@@ -2,12 +2,23 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>Register - Swopsy</title>
+    <title>Register - EcoSwap</title>
     <link href="https://fonts.googleapis.com/css2?family=Open+Sans&family=Poppins:wght@600&display=swap" rel="stylesheet">
     <style>
+        /* --- ECO-SWAP GREEN THEME STYLES --- */
+        :root {
+            --color-primary: #388e3c; /* Dark Green */
+            --color-secondary: #66bb6a; /* Medium Green (for button/accents) */
+            --color-light-bg: #f1f8e9; /* Very Light Green Background */
+            --color-input-border: #a5d6a7; /* Subtle Green Border */
+            --color-error-bg: #ffcdd2; 
+            --color-error-text: #d32f2f; 
+            --color-text: #444;
+        }
+
         body {
             font-family: 'Open Sans', sans-serif;
-            background-color: #ffe6f0;
+            background-color: var(--color-light-bg);
             display: flex;
             justify-content: center;
             align-items: center;
@@ -26,7 +37,7 @@
 
         .register-box h2 {
             font-family: 'Poppins', sans-serif;
-            color: #c2185b;
+            color: var(--color-primary); /* Dark Green */
             margin-bottom: 28px;
             font-size: 1.5rem;
         }
@@ -40,7 +51,7 @@
             display: block;
             margin-bottom: 6px;
             font-weight: bold;
-            color: #c2185b;
+            color: var(--color-primary); /* Dark Green */
         }
 
         .register-box input[type="text"],
@@ -49,17 +60,20 @@
             width: 100%;
             padding: 12px 14px;
             border-radius: 8px;
-            border: 1px solid #f8bbd0;
+            border: 1px solid var(--color-input-border); /* Subtle Green Border */
             font-size: 0.95rem;
             box-sizing: border-box;
+            transition: border-color 0.3s;
         }
 
-        .register-box input::placeholder {
-            color: #bbb;
+        .register-box input:focus {
+            border-color: var(--color-primary);
+            outline: none;
+            box-shadow: 0 0 0 2px rgba(56, 142, 60, 0.2); /* Dark Green Focus Shadow */
         }
 
         .register-box button {
-            background-color: #f48fb1;
+            background-color: var(--color-secondary); /* Medium Green */
             color: white;
             border: none;
             padding: 12px;
@@ -72,22 +86,17 @@
         }
 
         .register-box button:hover {
-            background-color: #ec407a;
+            background-color: var(--color-primary); /* Dark Green */
         }
 
         .register-box p {
             margin-top: 20px;
             font-size: 0.9rem;
-            color: #444;
+            color: var(--color-text);
         }
 
-        .register-box .login-link {
-            margin-top: 20px;
-            font-size: 0.9rem;
-            color: #444;
-        }
         .register-box a {
-            color: #c2185b;
+            color: var(--color-primary); /* Dark Green */
             font-weight: bold;
             text-decoration: none;
         }
@@ -95,22 +104,33 @@
         .register-box a:hover {
             text-decoration: underline;
         }
+        
+        /* --- Flash Message/Error Styling --- */
+        .alert-error, .alert-message {
+            background-color: var(--color-error-bg);
+            color: var(--color-error-text);
+            padding: 10px;
+            border-radius: 6px;
+            margin-bottom: 15px;
+            border: 1px solid var(--color-error-text);
+            font-size: 0.9rem;
+            font-weight: bold;
+            text-align: center;
+        }
     </style>
 </head>
 
 <body>
     <div class="register-box">
         <div class="register-container">
-            <h2>Create an Account</h2>
+            <h2>Create an EcoSwap Account</h2>
 
-            <p id="error-message" class="error-message" style="display: none;"></p>
+            <p id="error-message" class="alert-message" style="display: none;"></p>
             
             {% with messages = get_flashed_messages(with_categories=true) %}
                 {% if messages %}
                     {% for category, message in messages %}
-                        {% if 'register' in category or 'error' in category %}
-                            <div class="alert-{{ category }}">{{ message }}</div>
-                        {% endif %}
+                        <div class="alert-error">{{ message }}</div>
                     {% endfor %}
                 {% endif %}
             {% endwith %}
@@ -119,17 +139,17 @@
             <form method="POST" action="{{ url_for('register') }}" onsubmit="return checkPasswords();">
                 <div class="form-group">
                     <label for="full_name">Full Name</label>
-                    <input type="text" name="full_name" placeholder="Enter your full name" required>
+                    <input type="text" name="full_name" placeholder="Enter your full name" required value="{{ request.form.full_name if request.method == 'POST' }}">
                 </div>
 
                 <div class="form-group">
                     <label for="email">Email</label>
-                    <input type="email" name="email" placeholder="Enter your Bilkent email" required>
+                    <input type="email" name="email" placeholder="Enter your email" required value="{{ request.form.email if request.method == 'POST' }}">
                 </div>
 
                 <div class="form-group">
                     <label for="username">Username</label>
-                    <input type="text" name="username" placeholder="Enter your username" required>
+                    <input type="text" name="username" placeholder="Enter your username" required value="{{ request.form.username if request.method == 'POST' }}">
                 </div>
 
                 <div class="form-group">
@@ -157,7 +177,7 @@
                 const msgBox = document.getElementById('error-message');
 
                 if (password !== confirmPassword) {
-                    msgBox.textContent = "Passwords do not match.";
+                    msgBox.textContent = "Error: Passwords do not match.";
                     msgBox.style.display = "block";
                     return false;
                 } else {

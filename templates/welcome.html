@@ -5,9 +5,17 @@
     <title>Welcome to EcoSwap</title>
     <link href="https://fonts.googleapis.com/css2?family=Open+Sans&family=Poppins:wght@600&display=swap" rel="stylesheet">
     <style>
+        /* --- ECO-SWAP GREEN THEME STYLES --- */
+        :root {
+            --color-primary: #388e3c; /* Dark Green */
+            --color-secondary: #66bb6a; /* Medium Green (for button/accents) */
+            --color-light-bg: #f1f8e9; /* Very Light Green Background */
+            --color-text: #444;
+        }
+
         body {
             font-family: 'Open Sans', sans-serif;
-            background-color: #fff0f5;
+            background-color: var(--color-light-bg); /* Light Green Background */
             display: flex;
             justify-content: center;
             align-items: center;
@@ -26,8 +34,9 @@
 
         h1 {
             font-family: 'Poppins', sans-serif;
-            color: #c2185b;
+            color: var(--color-primary); /* Dark Green */
             margin-bottom: 16px;
+            font-size: 2.5rem;
         }
 
         p {
@@ -38,7 +47,7 @@
 
         .welcome-buttons a {
             display: inline-block;
-            background-color: #f48fb1;
+            background-color: var(--color-secondary); /* Medium Green */
             color: white;
             padding: 12px 24px;
             margin: 0 8px;
@@ -46,10 +55,13 @@
             font-weight: bold;
             text-decoration: none;
             transition: background-color 0.3s ease;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
         }
 
         .welcome-buttons a:hover {
-            background-color: #ec407a;
+            background-color: var(--color-primary); /* Dark Green */
+            transform: translateY(-2px);
+            box-shadow: 0 6px 8px rgba(0, 0, 0, 0.15);
         }
     </style>
 </head>

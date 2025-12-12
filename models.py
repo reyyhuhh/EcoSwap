@@ -76,10 +76,21 @@ class ScamReport(db.Model):
     def __repr__(self):
         return f'<ScamReport {self.id} - {self.scam_type} - {self.product_name}>'
     
+from datetime import datetime
+from flask_sqlalchemy import SQLAlchemy # Assuming db is an instance of SQLAlchemy
+
 class Feedback(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
-    content = db.Column(db.Text, nullable=False)
+    
+    # Fields to match the data being saved in the route
+    feedback_topic = db.Column(db.String(100), nullable=False)
+    feedback_type = db.Column(db.String(50), nullable=False)
+    description = db.Column(db.Text, nullable=False)
+    contact_info = db.Column(db.String(100), nullable=True) # Optional field
+    
     timestamp = db.Column(db.DateTime, default=datetime.utcnow)
-
     user = db.relationship('User', backref='feedbacks')
+
+    def __repr__(self):
+        return f"Feedback('{self.feedback_topic}', '{self.timestamp}')"
