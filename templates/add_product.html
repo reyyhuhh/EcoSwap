@@ -39,11 +39,11 @@
             text-align: center;
             cursor: pointer;
             text-decoration: none;
-            display: block; /* Change from inline-block to block for full width */
+            display: block;
             margin: 20px auto 0;
             transition: all 0.3s ease;
             width: 100%;
-            max-width: 520px; /* Match form inner width */
+            max-width: 520px; 
             box-sizing: border-box;
         }
 
@@ -103,7 +103,7 @@
 
         textarea {
             resize: vertical;
-            min-height: 100px; /* Reduced slightly for better fit */
+            min-height: 100px; 
         }
 
         button {
@@ -179,30 +179,27 @@
 
         <label for="description">Description:</label>
         <textarea name="description" id="description" required></textarea>
-
-        <label for="quality">Quality of the Product:</label>
-        <select name="quality" id="quality" required>
-            <option value="">Select Quality</option>
-            <option value="new">New</option>
-            <option value="like_new">Like New</option>
-            <option value="used">Used</option>
-            <option value="worn">Worn</option>
-        </select>
         
         <div class="checkbox-group">
             <input type="checkbox" name="swap" id="swap">
             <label class="swap-label" for="swap">Available for Swap</label>
         </div>
 
+        <label for="quality">Product Quality:</label>
+        <select name="quality" id="quality" required>
+            <option value="Excellent">Excellent - New or Like-New</option>
+            <option value="Good" selected>Good - Minor wear, fully functional</option>
+            <option value="Fair">Fair - Noticeable wear, functional</option>
+            <option value="Poor">Poor - Significant wear, repair likely needed</option>
+        </select>
+
         <label class="file-label" for="image">Image:</label>
         <input type="file" name="image" id="image" class="file-input" accept="image/*" required>
 
         <button type="submit">Add Product</button> 
-
-        <a href="{{ url_for('home') }}" class="back-home-btn">← Back to Home</a>
         
     </form>
-    
 
+    <a href="{{ url_for('home') }}" class="back-home-btn">← Back to Home</a>
 </body>
 </html>

@@ -22,7 +22,6 @@ class User(db.Model, UserMixin):
     def __repr__(self):
         return f'<User {self.username}>'
 
-
 class Product(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     title = db.Column(db.String(100), nullable=False)
@@ -30,9 +29,9 @@ class Product(db.Model):
     image_filename = db.Column(db.String(200))
     swap_option = db.Column(db.Boolean, default=False)
     user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
-    price = db.Column(db.Float, nullable=False, default=0.0)
     seller = db.relationship('User', back_populates='products')
     sold = db.Column(db.Boolean, default=False)
+    quality_level = db.Column(db.String(50), nullable=False, default='Good')
 
 
 class Message(db.Model):

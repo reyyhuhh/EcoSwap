@@ -173,3 +173,17 @@ button:hover {
 .btn-cart, .btn-buy:hover {
     opacity: 0.85;
 }
+
+/* Inside the <style> block in home.html */
+.quality-badge {
+    background-color: #e8f5e9; /* Very Light Green */
+    color: #388e3c;           /* Green text */
+    font-size: 0.85rem;
+    padding: 6px 10px;
+    border-radius: 8px;
+    margin-top: 5px; 
+    margin-bottom: 10px;
+    display: inline-block; /* Essential for padding/margin */
+    font-weight: bold;
+    border: 1px solid #c8e6c9;
+}

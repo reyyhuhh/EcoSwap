@@ -10,7 +10,7 @@ from sqlalchemy import or_
 from datetime import datetime # Needed for the Feedback model timestamp if defined there
 
 # --- CONSOLIDATED MODEL IMPORTS (Ensure these are correctly defined in models.py) ---
-from models import db, User, Product, Feedback, Message, CartItem, Order
+from db_models import db, User, Product, Feedback, Message, CartItem, Order
 # -----------------------------------------------------------------------------------
 
 app = Flask(__name__)
@@ -85,13 +85,13 @@ def root():
 @login_required
 def home():
     products = Product.query.filter_by(sold=False).all() # Only show unsold products
+    
     return render_template('home.html', products=products)
 
 @app.route('/login', methods=['GET', 'POST'])
 def login():
     if current_user.is_authenticated:
         return redirect(url_for('home'))
-
     if request.method == 'POST':
         login_input = request.form['email']
         password = request.form['password']
@@ -130,7 +130,6 @@ def admin():
 
     all_users = User.query.all()
     all_products = Product.query.all()
-    # Feedback is now correctly imported
     all_feedback = Feedback.query.all()
 
     return render_template(
@@ -166,6 +165,11 @@ def register():
         if User.query.filter(or_(User.username == username, User.email == email)).first():
             flash("Username or Email already exists.", "error")
             return redirect(url_for('register'))
+        
+        allowed_domains = ("@ug.bilkent.edu.tr", "@pg.bilkent.edu.tr", "@bilkent.edu.tr")
+        if not email.endswith(allowed_domains):
+            flash("Please use your Bilkent email.", "error")
+            return redirect(url_for('register'))
 
         hashed_pw = bcrypt.generate_password_hash(request.form['password']).decode('utf-8')
 
@@ -177,7 +181,7 @@ def register():
         )
         db.session.add(new_user)
         db.session.commit()
-        flash("Registration successful! Please log in.", "success")
+        flash("success")
         return redirect('/login')
     return render_template('register.html')
 
@@ -185,29 +189,24 @@ def register():
 @app.route('/add-product', methods=['GET', 'POST'])
 @login_required
 def add_product():
-    if request.method == 'POST':
+    if request.method == 'POST':        
         title = request.form['title']
         description = request.form['description']
         swap_option = 'swap' in request.form
-
-        image_file = request.files.get('image') # Use .get() for safety
+        quality = request.form['quality']
+        
+        # --- 2. PROCESS FILE UPLOAD FIRST ---
+        image_file = request.files.get('image')
         filename = None
-
+        
         if image_file and image_file.filename != '' and allowed_file(image_file.filename):
             filename = secure_filename(image_file.filename)
             image_path = os.path.join(app.config['UPLOAD_FOLDER'], filename)
             
-            # Ensure the upload folder exists before saving
+            # Save the file before using the filename variable in the database object
             os.makedirs(app.config['UPLOAD_FOLDER'], exist_ok=True)
             image_file.save(image_path)
-            
-        # Ensure price is handled safely if not provided or non-numeric
-        try:
-            price = float(request.form.get('price') or 0.0)
-        except ValueError:
-            flash("Invalid price entered.", "error")
-            return redirect(url_for('add_product'))
-
+        
 
         new_product = Product(
             title=title,
@@ -215,12 +214,17 @@ def add_product():
             swap_option=swap_option,
             user_id=current_user.id,
             image_filename=filename,
-            price=price
+            quality_level=quality,
+            price=0.0
         )
+
         db.session.add(new_product)
+        
         db.session.commit()
         flash("Product listed successfully!", "success")
         return redirect('/')
+    
+    # Render GET request template
     return render_template('add_product.html')
 
 @app.route('/chat/<int:receiver_id>', methods=['GET', 'POST'])
@@ -251,7 +255,7 @@ def chat (receiver_id):
 @login_required
 def search():
     search_query = request.args.get('search', '') # Default to empty string
-    
+
     if search_query:
         products = Product.query.filter(
             Product.sold == False, # Only search unsold products

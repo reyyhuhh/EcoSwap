@@ -144,7 +144,17 @@
 
                 <div class="form-group">
                     <label for="email">Email</label>
-                    <input type="email" name="email" placeholder="Enter your email" required value="{{ request.form.email if request.method == 'POST' }}">
+                    <input type="email" 
+                        name="email" 
+                        placeholder="Enter your Bilkent email" 
+                        required 
+                        value="{{ request.form.email if request.method == 'POST' }}"
+                        
+                        {{-- 💡 ADDED PATTERN ATTRIBUTE HERE --}}
+                        pattern="[a-zA-Z0-9._%+-]+@(ug\.bilkent\.edu\.tr|pg\.bilkent\.edu\.tr|bilkent\.edu\.tr)"
+                        title="Must be a valid Bilkent email (ug.bilkent.edu.tr, pg.bilkent.edu.tr, or bilkent.edu.tr)"
+                        {{-- --------------------------------- --}}
+                    >
                 </div>
 
                 <div class="form-group">
