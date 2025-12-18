@@ -150,10 +150,8 @@
                         required 
                         value="{{ request.form.email if request.method == 'POST' }}"
                         
-                        {{-- 💡 ADDED PATTERN ATTRIBUTE HERE --}}
                         pattern="[a-zA-Z0-9._%+-]+@(ug\.bilkent\.edu\.tr|pg\.bilkent\.edu\.tr|bilkent\.edu\.tr)"
                         title="Must be a valid Bilkent email (ug.bilkent.edu.tr, pg.bilkent.edu.tr, or bilkent.edu.tr)"
-                        {{-- --------------------------------- --}}
                     >
                 </div>
 

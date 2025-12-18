@@ -1,90 +1,194 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <title>Orders for {{ product.title }}</title>
-  <style>
-    body {
-      font-family: 'Segoe UI', sans-serif;
-      background-color: #fff0f5;
-      padding: 40px;
-    }
+    <meta charset="UTF-8">
+    <title>Swap Request - EcoSwap</title>
+    <link href="https://fonts.googleapis.com/css2?family=Open+Sans&family=Poppins:wght@600&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Open Sans', sans-serif;
+            background: url("{{ url_for('static', filename='uploads/websitebackground.png') }}") no-repeat center center fixed;
+            background-size: cover;
+            margin: 0; 
+            padding: 20px;
+            color: #333;
+        }
 
-    .container {
-      max-width: 800px;
-      margin: 0 auto;
-      background: white;
-      border-radius: 14px;
-      padding: 30px;
-      box-shadow: 0 4px 12px rgba(0,0,0,0.1);
-    }
+        .orders-container {
+            max-width: 800px;
+            margin: 40px auto;
+            background: rgba(255, 255, 255, 0.95);
+            padding: 30px;
+            border-radius: 15px;
+            box-shadow: 0 8px 25px rgba(0,0,0,0.1);
+        }
 
-    h2 {
-      text-align: center;
-      color: #c2185b;
-      margin-bottom: 20px;
-    }
+        .orders-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 2px solid #e8f5e9;
+            margin-bottom: 25px;
+            padding-bottom: 15px;
+        }
 
-    .order-card {
-      background-color: #ffe6f0;
-      padding: 18px;
-      margin-bottom: 20px;
-      border-radius: 12px;
-      box-shadow: 0 2px 8px rgba(244, 143, 177, 0.2);
-    }
+        .order-card {
+            background: #fdfdfd;
+            border: 1px solid #e0e0e0;
+            padding: 20px;
+            border-radius: 12px;
+            margin-bottom: 15px;
+            transition: transform 0.2s ease, border-color 0.2s ease;
+        }
 
-    .order-card strong {
-      color: #ad1457;
-    }
+        .order-card:hover {
+            transform: translateY(-2px);
+            border-color: #a5d6a7;
+        }
 
-    .no-orders {
-      text-align: center;
-      color: #888;
-      font-style: italic;
-      margin-top: 20px;
-    }
+        .user-tag {
+            color: #2e7d32;
+            font-weight: bold;
+            font-size: 1.1rem;
+        }
 
-    .back-btn {
-      display: block;
-      margin-top: 30px;
-      text-align: center;
-    }
+        .message-box {
+            background: #f1f8e9;
+            padding: 15px;
+            border-radius: 8px;
+            margin: 15px 0;
+            font-style: italic;
+            color: #555;
+            border-left: 4px solid #81c784;
+        }
 
-    .back-btn a {
-      background-color: #f48fb1;
-      padding: 10px 18px;
-      border-radius: 8px;
-      color: white;
-      text-decoration: none;
-      font-weight: bold;
-    }
+        .btn-back {
+            text-decoration: none;
+            background: #66bb6a;
+            color: white;
+            padding: 10px 20px;
+            border-radius: 8px;
+            font-weight: bold;
+            transition: 0.3s;
+        }
 
-    .back-btn a:hover {
-      background-color: #ec407a;
-    }
-  </style>
+        .btn-back:hover { 
+            background: #388e3c; 
+        }
+
+        /* --- THE PRETTY BUTTONS --- */
+        .btn-group {
+            margin-top: 20px;
+            display: flex;
+            gap: 15px;
+            align-items: stretch;
+        }
+
+        .action-btn {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: 100%;
+            height: 48px; /* Fixed height for perfect alignment */
+            border-radius: 10px;
+            font-family: 'Poppins', sans-serif;
+            font-weight: 600;
+            font-size: 0.95rem;
+            text-decoration: none;
+            transition: all 0.3s ease;
+            border: none;
+            cursor: pointer;
+            box-sizing: border-box;
+        }
+
+        /* Reply Button: Nature Green */
+        .btn-reply {
+            background-color: #81c784;
+            color: white;
+        }
+
+        /* Accept Button: Strong Eco Green */
+        .btn-accept {
+            background-color: #388e3c;
+            color: white;
+        }
+
+        .action-btn:hover {
+            opacity: 0.9;
+            transform: translateY(-1px);
+            box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+        }
+
+        .action-btn:active {
+            transform: translateY(0);
+        }
+
+        /* Decline Button: Soft Red/Muted Rose */
+        .btn-decline {
+            background-color: #ef5350;
+            color: white;
+        }
+
+        .btn-decline:hover {
+            background-color: #d32f2f;
+        }
+    </style>
 </head>
 <body>
-  <div class="container">
-    <h2>Orders for "{{ product.title }}"</h2>
 
-    {% if orders %}
-      {% for order in orders %}
-        <div class="order-card">
-          <p><strong>Buyer:</strong> {{ order.buyer.username }}</p>
-          <p><strong>Delivery Method:</strong> {{ order.delivery_method }}</p>
-          <p><strong>Shipping Address:</strong> {{ order.shipping_address }}</p>
-          <p><strong>Payment Method:</strong> {{ order.payment_method }}</p>
-          <small>Ordered on {{ order.timestamp.strftime('%Y-%m-%d %H:%M:%S') }}</small>
-        </div>
-      {% endfor %}
-    {% else %}
-      <p class="no-orders">No one has ordered this product yet.</p>
-    {% endif %}
-
-    <div class="back-btn">
-      <a href="{{ url_for('profile') }}">← Back to My Listings</a>
+<div class="orders-container">
+    <div class="orders-header">
+        <h1 style="color: #2e7d32; margin: 0; font-family: 'Poppins', sans-serif;">Swap Requests</h1>
+        <a href="{{ url_for('profile') }}" class="btn-back">← Back to Profile</a>
     </div>
-  </div>
+
+    <h3 style="color: #666; margin-bottom: 20px;">Item: {{ product.title }}</h3>
+
+    {% if requests %}
+        {% for order in requests %}
+            <div class="order-card">
+                <div style="display: flex; justify-content: space-between; align-items: center;">
+                    <span class="user-tag">@{{ order.sender.username }}</span>
+                    <span style="font-size: 0.8rem; color: #999; font-weight: bold; text-transform: uppercase;">New Request</span>
+                </div>
+
+                <div class="message-box">
+                    "{{ order.content }}"
+                </div>
+                
+                <div class="btn-group">
+                    <div style="flex: 1;">
+                        <a href="{{ url_for('chat', receiver_id=order.sender_id) }}" class="action-btn btn-reply">
+                            Reply / Chat
+                        </a>
+                    </div>
+
+                    {% if not product.sold %}
+                    <form action="{{ url_for('accept_swap', product_id=product.id, buyer_id=order.sender_id) }}" 
+                          method="POST" style="flex: 1;">
+                        <button type="submit" class="action-btn btn-accept" 
+                                onclick="return confirm('Accept this swap? This will mark the item as SOLD.')">
+                            Accept Swap
+                        </button>
+                    </form>
+
+                    <form action="{{ url_for('decline_swap', message_id=order.id) }}" 
+                          method="POST" style="flex: 1;">
+                        <button type="submit" class="action-btn btn-decline" 
+                                onclick="return confirm('Are you sure you want to decline this request? This cannot be undone.')">
+                            Decline
+                        </button>
+                    </form>
+                    {% endif %}
+                </div>
+            </div>
+        {% endfor %}
+    {% else %}
+        <div style="text-align: center; padding: 50px 0;">
+            <p style="color: #888; font-size: 1.2rem; font-style: italic;">No swap requests yet for this item.</p>
+        </div>
+    {% endif %}
+</div>
+
 </body>
 </html>

@@ -10,7 +10,7 @@ from sqlalchemy import or_
 from datetime import datetime # Needed for the Feedback model timestamp if defined there
 
 # --- CONSOLIDATED MODEL IMPORTS (Ensure these are correctly defined in models.py) ---
-from db_models import db, User, Product, Feedback, Message, CartItem, Order
+from db_models import db, User, Product, Feedback, Message
 # -----------------------------------------------------------------------------------
 
 app = Flask(__name__)
@@ -41,29 +41,30 @@ def load_user(user_id):
 
 # --- DATABASE AND ADMIN SETUP ---
 # Moved db.create_all() here to ensure tables exist before any query runs
-with app.app_context():
-    db.create_all() 
+#with app.app_context():
+    #db.create_all() 
 
 def create_admin():
     with app.app_context():
-        # Check if admin exists
-        # This query now succeeds because db.create_all() has run
-        admin = User.query.filter_by(username='adminecoswap').first()
-        if not admin:
-            # Create the admin if not found
-            hashed_pw = bcrypt.generate_password_hash('ecoswap12345').decode('utf-8')
-            new_admin = User(
-                full_name='System Admin',
-                username='adminecoswap',
-                email='admin@ecoswap.com', 
-                password=hashed_pw,
-                is_admin=True 
-            )
-            db.session.add(new_admin)
-            db.session.commit()
-            print("Admin account created successfully!")
-        else:
-            print("Admin account already exists.")
+        try:
+            # Check if admin exists
+            admin = User.query.filter_by(username='adminecoswap').first()
+            if not admin:
+                hashed_pw = bcrypt.generate_password_hash('ecoswap12345').decode('utf-8')
+                new_admin = User(
+                    full_name='System Admin',
+                    username='adminecoswap',
+                    email='admin@ecoswap.com', 
+                    password=hashed_pw,
+                    is_admin=True 
+                )
+                db.session.add(new_admin)
+                db.session.commit()
+                print("Admin account created successfully!")
+            else:
+                print("Admin account already exists.")
+        except Exception:
+            print("Database tables not found. Skipping admin creation until 'flask db upgrade' is run.")
 
 create_admin()
 
@@ -123,21 +124,62 @@ def login():
 @app.route('/admin')
 @login_required
 def admin():
-    # Ensure only admins can access this route
+    # 1. Security Check: Ensure only admins can access
     if not current_user.is_admin:
         flash("You are not authorized to view this page.", "error")
         return redirect(url_for('home'))
 
+    # 2. Fetch all data for the dashboard
     all_users = User.query.all()
     all_products = Product.query.all()
     all_feedback = Feedback.query.all()
+    # Ensure ScamReport is imported from db_models at the top of your file
+    all_scamreports = ScamReport.query.order_by(ScamReport.timestamp.desc()).all()
 
     return render_template(
         'admin.html',
         users=all_users,
         products=all_products,
-        feedback_list=all_feedback
+        feedback_list=all_feedback,
+        reports=all_scamreports # This matches the {% for report in reports %} in your HTML
     )
+
+@app.route('/admin/delete_product/<int:product_id>', methods=['POST'])
+@login_required
+def admin_delete_product(product_id):
+    # 1. Security Check: Only admins can trigger a deletion
+    if not current_user.is_admin:
+        abort(403) 
+    
+    product = Product.query.get_or_404(product_id)
+    
+    # 2. Delete the reports associated with this product first (Child records)
+    ScamReport.query.filter_by(product_id=product_id).delete()
+    
+    # 3. Delete the product itself (Parent record)
+    db.session.delete(product)
+    db.session.commit()
+    
+    flash("The reported product and its associated reports have been removed.", "success")
+    
+    # 4. Redirect to the FUNCTION NAME 'admin'
+    return redirect(url_for('admin'))
+
+@app.route('/admin/dismiss_report/<int:report_id>', methods=['POST'])
+@login_required
+def dismiss_report(report_id):
+    # Security Check
+    if not current_user.is_admin:
+        abort(403)
+
+    # Find the specific report
+    report = ScamReport.query.get_or_404(report_id)
+    
+    db.session.delete(report)
+    db.session.commit()
+    
+    flash("The report was dismissed. The listing remains active.", "info")
+    return redirect(url_for('admin'))
 
 @app.route('/logout')
 @login_required
@@ -214,8 +256,7 @@ def add_product():
             swap_option=swap_option,
             user_id=current_user.id,
             image_filename=filename,
-            quality_level=quality,
-            price=0.0
+            quality_level=quality
         )
 
         db.session.add(new_product)
@@ -228,8 +269,9 @@ def add_product():
     return render_template('add_product.html')
 
 @app.route('/chat/<int:receiver_id>', methods=['GET', 'POST'])
+@app.route('/chat/<int:receiver_id>/<int:product_id>')
 @login_required
-def chat (receiver_id):
+def chat (receiver_id, product_id=None):
     receiver = User.query.get_or_404(receiver_id)
 
     if request.method == 'POST':
@@ -334,62 +376,6 @@ def delete_chat(other_user_id):
         
     return redirect(url_for('inbox'))
 
-@app.route('/cart')
-@login_required
-def cart():
-    items = CartItem.query.filter_by(user_id=current_user.id).all()
-    # Ensure item.product exists before accessing price
-    total = sum(item.product.price or 0 for item in items if item.product) 
-    return render_template("cart.html", items=items, total=total)
-
-@app.route('/checkout', methods=['GET', 'POST'])
-@login_required
-def checkout():
-    items = CartItem.query.filter_by(user_id=current_user.id).all()
-    if not items:
-        flash("Your cart is empty.", "error")
-        return redirect(url_for('cart'))
-        
-    total = sum(item.product.price or 0 for item in items)
-    
-    # Store items details for receipt before clearing the cart
-    cart_items_for_receipt = [{'title': item.product.title, 'price': item.product.price or 0} for item in items]
-
-
-    if request.method == 'POST':
-        delivery = request.form['delivery']
-        address = request.form['address']
-        payment = request.form['payment']
-
-        for item in items:
-            # Note: This assumes the Product model has a seller_id or we use item.product.user_id
-            order = Order(
-                buyer_id=current_user.id,
-                product_id=item.product.id,
-                delivery_method=delivery,
-                shipping_address=address,
-                payment_method=payment
-            )
-            db.session.add(order)
-            item.product.sold = True # Mark product as sold
-
-        # Commit all orders and product updates
-        db.session.commit() 
-        
-        # Clear the cart ONLY AFTER successful order creation and commit
-        CartItem.query.filter_by(user_id=current_user.id).delete()
-        db.session.commit()
-        
-        # Store receipt details in session for the next request
-        session['last_order_items'] = cart_items_for_receipt
-        session['last_order_total'] = total
-
-        flash("Order placed successfully!", "success")
-        return redirect(url_for('receipt'))
-
-    return render_template('checkout.html', items=items, total=total)
-
-
 @app.route('/toggle_sold/<int:product_id>', methods=['POST'])
 @login_required
 def toggle_sold(product_id):
@@ -402,28 +388,6 @@ def toggle_sold(product_id):
     db.session.commit()
     flash(f"Status changed to {'Sold' if product.sold else 'Available'}.", "info")
     return redirect(url_for('profile'))
-
-@app.route('/orders/<int:product_id>')
-@login_required
-def orders_for_product(product_id):
-    product = Product.query.get_or_404(product_id)
-
-    if product.user_id != current_user.id:
-        abort(403)
-
-    orders = Order.query.filter_by(product_id=product.id).all()
-    return render_template('orders_for_product.html', product=product, orders=orders)
-
-
-@app.route('/my_orders')
-@login_required
-def my_orders():
-    # Show orders where current user is the product owner (seller)
-    orders_as_seller = Order.query.join(Product).filter(Product.user_id == current_user.id).all()
-    # Show orders where current user is the buyer
-    orders_as_buyer = Order.query.filter_by(buyer_id=current_user.id).all()
-    
-    return render_template('my_orders.html', orders_as_seller=orders_as_seller, orders_as_buyer=orders_as_buyer)
 
 @app.route('/feedback', methods=['GET', 'POST'])
 @login_required
@@ -453,16 +417,6 @@ def feedback():
 
     return render_template('feedback.html')
 
-@app.route('/remove_from_cart/<int:item_id>', methods=['POST'])
-@login_required
-def remove_from_cart(item_id):
-    item = CartItem.query.filter_by(id=item_id, user_id=current_user.id).first()
-    if item:
-        db.session.delete(item)
-        db.session.commit()
-        flash('Item removed from cart', 'success')
-    return redirect(url_for('cart'))
-
 @app.route('/profile')
 @login_required
 def profile(): 
@@ -482,47 +436,116 @@ def delete_product(product_id):
     flash("Product deleted successfully.", "success")
     return redirect(url_for('profile'))
 
-@app.route('/add_to_cart/<int:product_id>', methods=['POST'])
+@app.route('/product/<int:product_id>/orders')
 @login_required
-def add_to_cart(product_id):
+def orders_for_product(product_id):
     product = Product.query.get_or_404(product_id)
     
-    if product.user_id == current_user.id:
-        flash("You cannot add your own product to the cart.", "error")
+    if product.user_id != current_user.id:
+        flash("Access denied.", "error")
         return redirect(url_for('home'))
+        
+    # Fetch all messages/requests specifically for this product
+    requests = Message.query.filter_by(product_id=product_id).all()
+    
+    return render_template('orders_for_product.html', product=product, requests=requests)
 
-    if product.sold:
-        flash("This product has already been sold.", "error")
+@app.route('/accept_swap/<int:product_id>/<int:buyer_id>', methods=['POST'])
+@login_required
+def accept_swap(product_id, buyer_id):
+    product = Product.query.get_or_404(product_id)
+    
+    # Check if current user is the owner
+    if product.user_id != current_user.id:
+        flash("Unauthorized action.", "error")
         return redirect(url_for('home'))
-
-    # Prevent duplicate entry
-    existing_item = CartItem.query.filter_by(user_id=current_user.id, product_id=product.id).first()
-    if existing_item:
-        flash("Product already in your cart.", "info")
-        return redirect(url_for('home'))
-
-    cart_item = CartItem(user_id=current_user.id, product_id=product.id)
-    db.session.add(cart_item)
+    
+    # Update the product
+    product.sold = True
+    product.buyer_id = buyer_id
+    
     db.session.commit()
-    flash("Added to cart successfully.", "success")
-    return redirect(url_for('home'))
+    flash(f"Swap confirmed! '{product.title}' is now marked as sold.", "success")
+    return redirect(url_for('profile'))
+
+@app.route('/send_swap_request/<int:product_id>', methods=['POST'])
+@login_required
+def send_swap_request(product_id):
+    product = Product.query.get_or_404(product_id)
+    
+    # Prevent users from swapping with themselves
+    if product.user_id == current_user.id:
+        flash("You cannot request your own item!", "error")
+        return redirect(url_for('home'))
+
+    new_message = Message(
+        sender_id=current_user.id,
+        receiver_id=product.user_id,
+        content=f"Hello! I am interested in swapping for your '{product.title}'. Is it still available?",
+        product_id=product.id
+    )
+    
+    db.session.add(new_message)
+    db.session.commit()
+    
+    flash(f"Swap request sent for {product.title}!", "success")
+    return redirect(url_for('home'))  
+
+from db_models import ScamReport 
+@app.route('/report_product/<int:product_id>', methods=['POST'])
+@login_required
+def report_product(product_id):
+    reason = request.form.get('reason')
+    if not reason:
+        flash("Please provide a reason for the report.", "error")
+        return redirect(url_for('home'))
+
+    report = ScamReport(
+        product_id=product_id,
+        reporter_id=current_user.id,
+        reason=reason
+    )
+    
+    db.session.add(report)
+    db.session.commit()
+    
+    flash("Thank you. The report has been sent to the admins for review.", "info")
+    return redirect(url_for('home'))  
 
 @app.context_processor
-def inject_cart_count():
+def inject_notifications():
     if current_user.is_authenticated:
-        count = CartItem.query.filter_by(user_id=current_user.id).count()
-        return dict(cart_count=count)
-    return dict(cart_count=0)
+        # 1. Count unread messages (assuming you have a 'read' column, 
+        # otherwise we can count total messages received in the last 24h)
+        # For now, let's count all messages where the user is the receiver
+        unread_msg_count = Message.query.filter_by(receiver_id=current_user.id).count()
+        
+        # 2. Count swap requests for the user's products
+        # We look for messages that have a product_id linked to a product owned by the user
+        swap_req_count = db.session.query(Message).join(Product).filter(
+            Product.user_id == current_user.id,
+            Message.product_id != None
+        ).count()
+        
+        return dict(unread_count=unread_msg_count, swap_count=swap_req_count)
+    return dict(unread_count=0, swap_count=0)
 
-
-@app.route('/buy_now/<int:product_id>', methods=['POST'])
+@app.route('/decline_swap/<int:message_id>', methods=['POST'])
 @login_required
-def buy_now(product_id):
-    # This route should typically redirect to checkout_single, not complete the purchase here.
-    # The existing logic here is poor practice (deleting the product immediately).
-    # Redirecting to the single checkout route is the correct flow.
-    return redirect(url_for('checkout_single', product_id=product_id))
+def decline_swap(message_id):
+    # Find the request message
+    request_to_delete = Message.query.get_or_404(message_id)
+    
+    # Optional: Safety check to ensure only the product owner can decline
+    product = Product.query.get(request_to_delete.product_id)
+    if product.user_id != current_user.id:
+        return "Unauthorized", 403
 
+    db.session.delete(request_to_delete)
+    db.session.commit()
+    
+    flash('Swap request declined and removed.', 'info')
+    return redirect(url_for('orders_for_product', product_id=product.id))
 
 # ---------------- RUN APP ---------------- #
 

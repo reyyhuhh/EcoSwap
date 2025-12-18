@@ -12,12 +12,14 @@ class User(db.Model, UserMixin):
     username = db.Column(db.String(50), nullable=False)
     email = db.Column(db.String(100), unique=True, nullable=False)
     password = db.Column(db.String(100), nullable=False)
-    is_admin = db.Column(db.Boolean, default=False) #admin account
+    is_admin = db.Column(db.Boolean, default=False)
 
-    products = db.relationship('Product', back_populates='seller')
+    products = db.relationship('Product',back_populates='seller',foreign_keys='Product.user_id')
+
+    swapped_items = db.relationship('Product',foreign_keys='Product.buyer_id')
+
     sent_messages = db.relationship('Message', foreign_keys='Message.sender_id', backref='sender', lazy=True)
     received_messages = db.relationship('Message', foreign_keys='Message.receiver_id', backref='receiver', lazy=True)
-    cart_items = db.relationship('CartItem', backref='user', lazy=True)
 
     def __repr__(self):
         return f'<User {self.username}>'
@@ -29,10 +31,12 @@ class Product(db.Model):
     image_filename = db.Column(db.String(200))
     swap_option = db.Column(db.Boolean, default=False)
     user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
-    seller = db.relationship('User', back_populates='products')
+    seller = db.relationship('User', back_populates='products', foreign_keys=[user_id])
+    buyer_id = db.Column(db.Integer, db.ForeignKey('user.id', name='fk_buyer_user'), nullable=True)
+    buyer = db.relationship('User', backref="swapped items", foreign_keys=[buyer_id], overlaps="swapped items")
     sold = db.Column(db.Boolean, default=False)
     quality_level = db.Column(db.String(50), nullable=False, default='Good')
-
+    requests= db.relationship('Message', backref='product', lazy=True)
 
 class Message(db.Model):
 	id = db.Column(db.Integer, primary_key=True)
@@ -40,13 +44,7 @@ class Message(db.Model):
 	receiver_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
 	content = db.Column(db.Text, nullable=False)
 	timestamp = db.Column(db.DateTime, default=datetime.utcnow)
-	#product_id = db.Column(db.Integer, db.ForeignKey('product.id', name='fk_product_id'), nullable=False)
-
-class CartItem(db.Model):
-    id = db.Column(db.Integer, primary_key=True)
-    user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
-    product_id = db.Column(db.Integer, db.ForeignKey('product.id'), nullable=False)
-    product = db.relationship('Product', backref='cart_items')
+	product_id = db.Column(db.Integer, db.ForeignKey('product.id', name='fk_product_id'), nullable=True)
 
 class Order(db.Model):
     id = db.Column(db.Integer, primary_key=True)
@@ -63,17 +61,14 @@ class Order(db.Model):
 class ScamReport(db.Model):
     __tablename__ = 'scam_reports'
     id = db.Column(db.Integer, primary_key=True)
-    product_name = db.Column(db.String(255), nullable=False)
-    scam_type = db.Column(db.String(100), nullable=False)
-    description = db.Column(db.Text, nullable=False)
-    contact_info = db.Column(db.String(255), nullable=True)
-    timestamp = db.Column(db.DateTime, default=datetime.utcnow)
+    product_id = db.Column(db.Integer, db.ForeignKey('product.id'), nullable=False)
+    reporter_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
+    reason = db.Column(db.String(500), nullable=False)
+    timestamp = db.Column(db.DateTime, default=db.func.current_timestamp())
 
-    user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
-    user = db.relationship('User', backref='scam_reports', lazy=True)
-
-    def __repr__(self):
-        return f'<ScamReport {self.id} - {self.scam_type} - {self.product_name}>'
+    # Relationships
+    product = db.relationship('Product', backref='reports')
+    reporter = db.relationship('User', backref='reports_made')
     
 from datetime import datetime
 from flask_sqlalchemy import SQLAlchemy # Assuming db is an instance of SQLAlchemy

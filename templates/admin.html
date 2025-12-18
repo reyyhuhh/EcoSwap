@@ -204,6 +204,58 @@
 
         <hr>
 
+        <h2>🚨 Security Reports ({{ reports|length }})</h2>
+        <table>
+            <thead>
+                <tr>
+                    <th>Product</th>
+                    <th>Reason for Report</th>
+                    <th>Reporter</th>
+                    <th>Time</th>
+                    <th>Action</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for report in reports %}
+                <tr>
+                    <td>
+                        <strong>{{ report.product.title }}</strong><br>
+                        <small style="color: var(--color-subtle-text)">Item ID: {{ report.product_id }}</small>
+                    </td>
+                    <td>{{ report.reason }}</td>
+                    <td>{{ report.reporter.username }}</td>
+                    <td>{{ report.timestamp.strftime('%Y-%m-%d %H:%M') }}</td>
+                    <td>
+                        <div style="display: flex; gap: 10px;">
+                            <form action="{{ url_for('dismiss_report', report_id=report.id) }}" method="POST" style="margin:0;">
+                                <button type="submit" class="logout-link" 
+                                        style="background-color: var(--color-secondary); border: none; cursor: pointer; font-size: 0.8rem; padding: 5px 10px;">
+                                    Dismiss
+                                </button>
+                            </form>
+
+                            <form action="{{ url_for('admin_delete_product', product_id=report.product_id) }}" method="POST" style="margin:0;">
+                                <button type="submit" class="logout-link" 
+                                        style="background-color: #d32f2f; border: none; cursor: pointer; font-size: 0.8rem; padding: 5px 10px;">
+                                    Remove Item
+                                </button>
+                            </form>
+                        </div>
+                    </td>
+                </tr>
+                {% endfor %}
+                {% if reports|length == 0 %}
+                <tr>
+                    <td colspan="5" style="text-align: center; color: var(--color-subtle-text);">
+                        No active security reports.
+                    </td>
+                </tr>
+                {% endif %}
+            </tbody>
+        </table>
+
+        <hr>
+
         <h2>💬 User Feedback ({{ feedback_list|length }})</h2>
         <table>
             <thead>

@@ -21,7 +21,7 @@
             font-family: 'Poppins', sans-serif;
             font-size: 2rem;
             margin: 30px 0 10px;
-            color: #388e3c;  /* Green Color */
+            color: #388e3c;
         }
 
         .top-nav {
@@ -29,7 +29,7 @@
             justify-content: space-between;
             align-items: center;
             padding: 14px 30px;
-            background-color: #c8e6c9;  /* Light Green */
+            background-color: #c8e6c9;
             border-bottom: 1px solid #a5d6a7;
             position: sticky;
             top: 0;
@@ -42,7 +42,7 @@
         }
 
         .top-nav a {
-            background-color: #66bb6a;  /* Green Button */
+            background-color: #66bb6a;
             color: #fff;
             padding: 10px 16px;
             text-decoration: none;
@@ -53,7 +53,7 @@
         }
 
         .top-nav a:hover {
-            background-color: #388e3c;  /* Darker Green on Hover */
+            background-color: #388e3c;
         }
 
         .search-form {
@@ -126,7 +126,7 @@
             font-size: 1.15rem;
             font-weight: 600;
             margin-bottom: 6px;
-            color: #388e3c;  /* Green Color for Titles */
+            color: #388e3c;
             font-family: 'Poppins', sans-serif;
         }
 
@@ -149,8 +149,8 @@
             margin-bottom: 10px;
         }
 
-        .swap-badge {
-            background-color: #a5d6a7;  /* Light Green */
+        .swap-badge, .quality-badge {
+            background-color: #a5d6a7;
             color: #2e7d32;
             font-size: 0.8rem;
             padding: 4px 10px;
@@ -160,9 +160,9 @@
             font-weight: bold;
         }
 
-        .chat-btn,
-        .btn-cart,
-        .btn-buy {
+        .chat-btn {
+            background-color: #64b5f6;
+            color: white;
             border: none;
             padding: 10px 14px;
             cursor: pointer;
@@ -174,32 +174,27 @@
             font-weight: bold;
         }
 
-        .chat-btn {
-            background-color: #64b5f6;  /* Light Green */
-            color: white;
-        }
-
         .chat-btn:hover {
-            background-color: #1976d2;  /* Darker Green */
+            background-color: #1976d2;
         }
 
-        .btn-cart {
-            background-color: #64b5f6;
-            color: #64b5f6;
+        /* ✅ Fix: Added Report Link Styling */
+        .report-link {
+            background: none;
+            border: none;
+            color: #d32f2f;
+            cursor: pointer;
+            font-size: 0.75rem;
+            text-decoration: underline;
+            padding: 0;
+            margin-top: 12px;
+            width: 100%;
+            text-align: center;
+            opacity: 0.7;
         }
 
-        .btn-cart:hover {
-            background-color: #64b5f6;
-            color: white;
-        }
-
-        .btn-buy {
-            background-color: #388e3c;  /* Green Buy Now */
-            color: white;
-        }
-
-        .btn-buy:hover {
-            background-color: #2e7d32;
+        .report-link:hover {
+            opacity: 1;
         }
 
         .no-products {
@@ -216,29 +211,6 @@
             object-fit: contain;
         }
 
-        .sold{
-            opacity: 0.6;
-            pointer-events: none;
-            position: relative;
-        }
-
-        .sold-badge {
-            position: relative;
-            top: 10px;
-            left: 10px;
-            background-color: crimson;
-            color: white;
-            padding: 4px 10px;
-            border-radius: 5px;
-            font-size: 0.85rem;
-            font-weight: bold;
-            z-index: 10;
-        }
-
-        .product-image {
-            position: relative;
-        }
-
         .sold-text {
             text-align: center;
             color: #fff;
@@ -247,52 +219,64 @@
             border-radius: 6px;
             font-weight: bold;
             margin-top: 10px;
+            width: 100%;
+            border: none;
         }
 
-        .quality-badge {
-            background-color: #e8f5e9; /* Very Light Green */
-            color: #388e3c;           /* Green text */
-            font-size: 0.85rem;
-            padding: 6px 10px;
-            border-radius: 8px;
-            margin-top: 5px; 
-            margin-bottom: 10px;
-            display: inline-block; 
+        .nav-link-wrapper {
+            position: relative;
+            display: inline-flex;
+            align-items: center;
+        }
+
+        .notification-badge {
+            position: absolute;
+            top: -5px;   /* Adjusted to sit better on the corner */
+            right: -5px;
+            background-color: #ff5252;
+            color: white;
+            border-radius: 50%;
+            padding: 2px 6px;
+            font-size: 0.7rem;
             font-weight: bold;
-            border: 1px solid #c8e6c9;
+            border: 2px solid white;
+            line-height: 1; /* Keeps the circle perfectly round */
+            z-index: 10;
         }
     </style>
 </head>
 <body>
     <p style="color: purple;">{{ quality_map }}</p>
 
-    <!-- SWOPSY Header Image -->
     <div class="site-header">
         <img src="{{ url_for('static', filename='uploads/swopsy.png') }}" alt="EcoSwap Header">
     </div>
 
-    <!-- Top Navigation -->
     <div class="top-nav">
-        <!-- ✅ Search Form -->
         <form class="search-form" action="{{ url_for('search') }}" method="GET">
             <input class="search-bar" type="text" name="search" placeholder="Search products..." />
         </form>
-        <!-- Navigation Links -->
         <div class="nav-buttons">
-            <a href="{{ url_for('inbox') }}">Inbox</a>
-            <a href="{{ url_for('add_product') }}">Add Product</a>
-            <a href="{{ url_for('profile') }}">Profile</a>
-                {% if cart_count and cart_count > 0 %}
-                    <span style="background-color:red; color:white; border-radius:50%; padding:2px 6px; font-size:0.8rem;">
-                        {{ cart_count }}
-                    </span>
+            <div class="nav-link-wrapper">
+                <a href="{{ url_for('inbox') }}">Inbox</a>
+                {% if unread_count > 0 %}
+                    <span class="notification-badge">{{ unread_count }}</span>
                 {% endif %}
+            </div>
+
+            <div class="nav-link-wrapper">
+                <a href="{{ url_for('profile') }}">Profile</a>
+                {% if swap_count > 0 %}
+                    <span class="notification-badge">{{ swap_count }}</span>
+                {% endif %}
+            </div>
+
+            <a href="{{ url_for('add_product') }}">Add Product</a>
             <a href="{{ url_for('feedback') }}">Feedback</a>
             <a href="{{ url_for('logout') }}">Logout</a>
         </div>
     </div>
 
-    <!-- Flash Messages -->
     <div class="flash-messages">
         {% with messages = get_flashed_messages(with_categories=true) %}
             {% if messages %}
@@ -303,11 +287,10 @@
         {% endwith %}
     </div>
 
-    <!-- Product Listings -->
     <div class="product-list">
         {% if products %}
             {% for product in products %}
-                <div class="product-card {% if product.sold %}sold{% endif %}">
+                <div class="product-card">
                     <div class="product-title">{{ product.title }}</div>
                     <div class="product-description">{{ product.description }}</div>
 
@@ -316,40 +299,48 @@
                     {% endif %}
 
                     {% if product.quality_level %}
-                    <div class="quality-badge">
-                        Quality: {{ product.quality_level }}
-                    </div>
+                    <div class="quality-badge">Quality: {{ product.quality_level }}</div>
                     {% endif %}
 
                     {% if product.image_filename %}
-                        <div class="product-image">
-                        <img src="{{ url_for('static', filename='uploads/' ~ product.image_filename) }}" alt="{{ product.title }}">
-                    {% if product.sold %}
-                        <div class="sold-badge">SOLD</div>
-                    {% endif %}
+                        <div class="product-image" style="position: relative;">
+                            <img src="{{ url_for('static', filename='uploads/' ~ product.image_filename) }}" alt="{{ product.title }}">
+                            {% if product.sold %}
+                                <div style="position: absolute; top: 10px; right: 10px; background: red; color: white; padding: 5px; border-radius: 5px; font-weight: bold;">SOLD</div>
+                            {% endif %}
                         </div>
                     {% endif %}
 
                     <div class="uploader">
-                         Uploaded by: <strong>{{ product.seller.username }}</strong>
+                        Uploaded by: <strong>{{ product.seller.username }}</strong>
                     </div>
 
                     {% if product.seller.id != current_user.id %}
-                        <a href="{{ url_for('chat', receiver_id=product.seller.id, product_id=product.id) }}">
-                            <button class="chat-btn">Chat Seller</button>
-                        </a>
-
                         {% if not product.sold %}
-                            <form action="{{ url_for('add_to_cart', product_id=product.id) }}" method="POST">
-                                <button type="submit" class="btn-cart">Add to Cart</button>
-                            </form>
-                            <a href="{{ url_for('checkout_single', product_id=product.id) }}">
-                                <button class="btn-buy">Buy Now</button>
+                            <a href="{{ url_for('chat', receiver_id=product.seller.id) }}" style="text-decoration: none;">
+                                <button class="chat-btn">Chat Seller</button>
                             </a>
-                        {% else %}
-                            <button class="sold-text">This item is sold</button>
-                        {% endif %}
 
+                            <form action="{{ url_for('send_swap_request', product_id=product.id) }}" method="POST" style="margin-top: 5px;">
+                                <button type="submit" style="background-color: #2e7d32; color: white; border: none; padding: 10px; border-radius: 6px; width: 100%; font-weight: bold; cursor: pointer;">
+                                    Quick Request Swap
+                                </button>
+                            </form>
+
+                            <form id="report-form-{{ product.id }}" action="{{ url_for('report_product', product_id=product.id) }}" method="POST">
+                                <input type="hidden" name="reason" id="reason-{{ product.id }}">
+                                <button type="button" class="report-link" data-id="{{ product.id }}" onclick="handleReport(this)">
+                                    Report this listing for security
+                                </button>
+                            </form>
+                            
+                        {% else %}
+                            <button class="sold-text" disabled>This item has been swapped</button>
+                        {% endif %}
+                    {% else %}
+                        <div style="text-align: center; color: #66bb6a; font-size: 0.85rem; font-weight: bold; margin-top: 10px;">
+                            (Your Listing)
+                        </div>
                     {% endif %}
                 </div>
             {% endfor %}
@@ -358,5 +349,20 @@
         {% endif %}
     </div>
 
+    <script>
+        function handleReport(btn) {
+            // Pull the ID from the button's data attribute
+            const productId = btn.getAttribute('data-id');
+            
+            let reason = prompt("Why are you reporting this product? (e.g. Scam, Fake item, Inappropriate content)");
+            
+            if (reason != null && reason.trim() !== "") {
+                // Set the hidden input value
+                document.getElementById('reason-' + productId).value = reason;
+                // Submit the specific form
+                document.getElementById('report-form-' + productId).submit();
+            }
+        }
+    </script>
 </body>
 </html>
